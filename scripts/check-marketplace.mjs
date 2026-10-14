@@ -21,7 +21,7 @@ const FORBIDDEN_REF = /dev-?digest|\.claude\/(?:skills|agents)\//i;
 const CYRILLIC = /[\u0400-\u04FF]/;
 const CODE = /```[\s\S]*?```|`[^`\n]*`/g;
 const FRONTMATTER = /^---\n[\s\S]*?\n---/;
-const ROOT_DOCS = ['.claude-plugin/marketplace.json', 'README.md', 'AGENTS.md', 'INSIGHTS.md', 'docs', 'specs'];
+const ROOT_DOCS = ['.claude-plugin/marketplace.json', 'README.md', 'AGENTS.md', 'INSIGHTS.md', 'docs', 'specs', 'site'];
 const STRICT_ENGLISH = ['scripts', 'evals', '.github'];
 
 const errors = [];

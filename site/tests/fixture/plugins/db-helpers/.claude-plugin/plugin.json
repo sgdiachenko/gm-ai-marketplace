@@ -1,0 +1,11 @@
+{
+  "name": "db-helpers",
+  "version": "0.5.0",
+  "description": "Database helpers",
+  "userConfig": {
+    "DATABASE_URL": { "type": "string", "title": "Database URL", "description": "Read-only connection string for the staging database", "sensitive": true }
+  },
+  "mcpServers": {
+    "postgres": { "command": "npx", "args": ["-y", "@example/postgres-mcp"] }
+  }
+}

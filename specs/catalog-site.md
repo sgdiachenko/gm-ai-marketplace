@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Draft, ready for design |
+| Status | Phase 1 implemented in `site/` |
 | Date | 2026-10-14 |
 | URL | https://sgdiachenko.github.io/gm-ai-marketplace/ |
 
@@ -268,6 +268,7 @@ Stop words, type words and synonyms live in `site/search-terms.json`, so maintai
   | body text | 1 |
 
 - **Match quality:** exact word, then prefix (query words of 3+ characters), then one typo (query words of 5+ characters).
+- **Weighted score:** each query word scores its best field, weight × match quality, and the document's score is the sum over query words. Taking the best field rather than adding all of them keeps a plugin's long README from outranking a skill whose name matches.
 - **Ordering:**
   1. Documents that match more distinct query words rank first.
   2. Then by weighted score.
@@ -291,28 +292,34 @@ Fixture: plugin `pr-tools` with skill `review-pr`, description "Reviews a pull r
 
 ### Layout
 
+Everything the site needs lives in `site/`, apart from files GitHub requires elsewhere, so it stays apart from the marketplace itself:
+
 ```
 site/
+├── build.mjs           builds _site/ from the repository
+├── dev.mjs             local server: rebuilds on changes, reloads the browser
+├── config.mjs          repository, branch, base path, locale
+├── i18n/en.json        every UI string, so none is written into templates or scripts
+├── lib/                build steps
 ├── templates/          page templates
-├── assets/             CSS, client-side JavaScript, icons
+├── assets/             CSS and client-side JavaScript, served as-is
 ├── vendor/             pinned third-party files, see Dependencies
-└── search-terms.json   stop words, type words, synonyms
-scripts/build-site.mjs  builds _site/ from the repository
-tests/site/             fixtures and node:test tests for the build and search
-.github/workflows/pages.yml
+├── search-terms.json   stop words, type words, synonyms
+└── tests/              fixtures and node:test tests for the build and search
+.github/workflows/site.yml
 .github/ISSUE_TEMPLATE/plugin-request.yml, bug-report.yml
 ```
 
 `_site/` goes into `.gitignore`.
 
-### Build: `node scripts/build-site.mjs [--out _site] [--root <dir>]`
+### Build: `node site/build.mjs [--out _site] [--root <dir>]`
 
 `--root` points the build at a fixture repository in tests.
 
-1. **Read the catalog and every plugin.** Parse frontmatter with a small built-in parser for the YAML subset skills use: scalars, quoted strings, `>` and `|` blocks, simple lists. Fail with `file:line` on anything else, and on a skill, agent or command without `name` or `description`.
+1. **Read the catalog and every plugin.** Parse frontmatter with a small built-in parser for the YAML subset skills use: scalars, quoted strings, `>` and `|` blocks, simple lists, and one level of mapping (`metadata:` with `tags`, which become search keywords). Fail with `file:line` on anything else, and on a skill, agent or command without `name` or `description`.
 2. **Check the inventory.** For each plugin, compare the components found with `claude --plugin-dir plugins/<name> plugin details <name>`, and fail on a mismatch. This catches components in custom paths and component types the build doesn't know yet. When the `claude` CLI is missing locally, skip the check with a warning, as `validate.sh` does for shellcheck; CI requires it.
 3. **Read git history.** Last commit date per plugin. In phase 2, also the version history from `plugin.json` and the commit subjects between versions. Needs the full history (`fetch-depth: 0`).
-4. **Render Markdown** for READMEs, component bodies and `docs/installing.md`. Raw HTML in Markdown is escaped. Relative links and images resolve to the file on GitHub.
+4. **Render Markdown** for READMEs, component bodies and `docs/installing.md`. Raw HTML in Markdown is escaped. Relative links resolve to the file on GitHub. Relative images are copied into the site, because the CSP allows no other origin; a missing image fails the build.
 5. **Write the output:** pages, `index.json`, `404.html`, and in phase 2 `feed.xml`.
 6. **Stay deterministic.** The same commit gives the same output: dates come from git, not the clock.
 7. **Phase 2, context cost:** parsed from the same `claude plugin details` output ("Always-on", "Per-component").
@@ -371,26 +378,25 @@ The repository has no npm dependencies, and the site needs a Markdown renderer a
 
 ### Deploy
 
-`.github/workflows/pages.yml`:
+`.github/workflows/site.yml`, a workflow of its own, so the site's result shows as a separate check from the marketplace checks in `validate.yml`:
 
 - **Triggers:**
+  - every pull request, so a PR fails on content the site can't build;
   - every push to `main`, with no path filter: the build takes seconds, and path filters miss template changes;
   - `workflow_dispatch` with an optional `ref` input, to redeploy an older commit.
-- **Build job:**
+- **Build and test the site** (all triggers):
   1. checkout with `fetch-depth: 0`;
   2. Node;
   3. Claude Code pinned to the same version as `validate.yml`;
-  4. `node scripts/build-site.mjs`;
-  5. `actions/upload-pages-artifact`.
-- **Deploy job:** `actions/deploy-pages` in the `github-pages` environment.
-- **Permissions:** `contents: read`, `pages: write`, `id-token: write`.
-- **Concurrency:** group `pages`, without cancel-in-progress, so deploys finish in order.
+  4. `node --test site/tests/*.test.mjs`;
+  5. `node site/build.mjs`, with its summary in the job summary;
+  6. `actions/upload-pages-artifact`, except on pull requests.
+- **Deploy to GitHub Pages** (`main` only): `actions/deploy-pages` in the `github-pages` environment.
+- **Permissions:** `contents: read`; the deploy job alone gets `pages: write` and `id-token: write`.
+- **Concurrency:** deploys share group `pages` without cancel-in-progress, so they finish in order; a newer push cancels an older build on the same pull request.
 - **One-time setup:** repository Settings → Pages → Source: GitHub Actions.
 
-`scripts/validate.sh` gains two steps, so a PR fails on content the site can't build:
-
-- a build into a temporary directory;
-- `node --test tests/site/`.
+`scripts/validate.sh` stays the marketplace check; the site has its own commands (`site/README.md`).
 
 ### Rollback
 

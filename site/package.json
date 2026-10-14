@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "description": "Marks site/ as ES modules, so the build and its tests import the same files the browser loads. No dependencies.",
+  "type": "module"
+}

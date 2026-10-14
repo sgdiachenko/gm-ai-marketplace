@@ -1,0 +1,6 @@
+{
+  "name": "release-kit",
+  "version": "1.2.0",
+  "description": "Release tooling",
+  "keywords": ["release", "changelog", "semver"]
+}

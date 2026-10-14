@@ -28,6 +28,7 @@ No GitHub SSH key? Set `CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1` first. Setup, updates
 - Release, roll back, rename or remove a plugin: [docs/releasing.md](docs/releasing.md)
 - Planned Codex support and the rules that keep it cheap: [docs/codex-compatibility.md](docs/codex-compatibility.md)
 - Before pushing, run `scripts/validate.sh`. CI runs the same checks, plus a version-bump check on pull requests.
+- The catalog site has its own check, Site; see [site/README.md](site/README.md).
 
 ## Layout
 
@@ -36,6 +37,7 @@ No GitHub SSH key? Set `CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1` first. Setup, updates
 plugins/<name>/                   a plugin; everything here ships to users
 scripts/                          validation, release tagging and eval runs
 evals/                            behaviour tests run with claude plugin eval; never shipped
+site/                             the catalog site on GitHub Pages, built from this repository
 docs/                             maintainer and user docs
 specs/                            specs for planned plugins and changes
 INSIGHTS.md                       lessons learned
