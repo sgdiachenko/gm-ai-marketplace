@@ -123,7 +123,7 @@ Review the draft. Ask for changes with `revise` mode, and when it is right: "Use
 Use sdd-engineering:implementation-planner, pass 1. Spec: docs/specs/2026-10-14-order-cancel.md
 ```
 
-Answer the recommendations and choose the execution mode. Then run pass 2 with `Mode: multi-agent` (or `single-agent`) and your `REC#` decisions. Save the approved plan to `docs/plans/order-cancel.md`.
+Save the pass-1 report, for example to `docs/plans/order-cancel.pass1.md`: pass 2 reads the `REC#` text from that file and won't restate it from memory. Answer the recommendations and choose the execution mode. Then run pass 2 with the report's path, `Mode: multi-agent` (or `single-agent`) and your `REC#` decisions. Save the approved plan to `docs/plans/order-cancel.md`.
 
 ### 3. Run the plan
 

@@ -14,6 +14,10 @@ All notable changes to `sdd-engineering`. Versions follow [semver](https://semve
 - A `Coverage: complete | incomplete — US-n (…)` line in every spec report, and `approval refused` as a report outcome. Existing report fields and the spec format are unchanged.
 - `COMPATIBILITY.md`: the Claude Code versions and platform features the plugin relies on.
 
+### Fixed
+
+- README: pass 2 of `implementation-planner` needs the saved pass-1 report's path; without it the planner stops and asks for the `REC#` text.
+
 ## 1.0.0 — 2026-10-14
 
 First release, ported from the team's in-repo workflow and made project-neutral.
