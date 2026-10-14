@@ -2,15 +2,42 @@
 
 A [Claude Code plugin marketplace](https://code.claude.com/docs/en/plugin-marketplaces) for the team. One repository, one catalog (`.claude-plugin/marketplace.json`), one directory per plugin in `plugins/`.
 
-## Install a plugin
+## Install
+
+In a Claude Code session, add the marketplace once:
+
+```
+/plugin marketplace add sgdiachenko/gm-ai-marketplace
+```
+
+Then install a plugin:
+
+```
+/plugin install <plugin>@gm-ai-marketplace
+```
+
+`<plugin>` is a name from the table below, the `name` of an entry in `.claude-plugin/marketplace.json`; `gm-ai-marketplace` is the catalog name. `/plugin` on its own browses the catalog.
+
+From a terminal, one command does both (Claude Code 2.1.275 or later):
 
 ```bash
 claude plugin install <plugin> --marketplace sgdiachenko/gm-ai-marketplace
 ```
 
-The command adds the marketplace on first use (Claude Code 2.1.275 or later). Inside a session, use `/plugin` to browse the catalog.
+No GitHub SSH key? Set `CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1` first.
 
-No GitHub SSH key? Set `CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1` first. Setup, updates and team-wide enablement: [docs/installing.md](docs/installing.md).
+## Update
+
+Updating is two different things:
+
+| Command | What it does |
+|---|---|
+| `/plugin marketplace update gm-ai-marketplace` | Refreshes the catalog, so new plugins and new versions show up |
+| `claude plugin update <plugin>@gm-ai-marketplace` | Updates one installed plugin to the version the catalog lists; run `/reload-plugins` or restart Claude Code to load it |
+
+Auto-update is off by default. To turn it on: `/plugin` → **Marketplaces** → `gm-ai-marketplace` → **Enable auto-update**.
+
+Setup details and enabling plugins for a whole project: [docs/installing.md](docs/installing.md).
 
 ## Plugins
 

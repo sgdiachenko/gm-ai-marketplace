@@ -30,10 +30,10 @@ claude plugin install <plugin>@gm-ai-marketplace
 
 Auto-update is off for this marketplace by default. To turn it on: `/plugin` → **Marketplaces** → `gm-ai-marketplace` → **Enable auto-update**. Claude Code then checks after your first message in a session and asks you to run `/reload-plugins`.
 
-To update by hand:
+To update by hand, refresh the catalog, then update the plugin. These are two different steps:
 
-- in a session: `/plugin marketplace update gm-ai-marketplace`
-- in a shell: `claude plugin update <plugin>@gm-ai-marketplace`
+- `/plugin marketplace update gm-ai-marketplace` in a session, or `claude plugin marketplace update gm-ai-marketplace` in a shell, refreshes the catalog, so new plugins and new versions show up;
+- `claude plugin update <plugin>@gm-ai-marketplace` updates one installed plugin to the version the catalog lists. Run `/reload-plugins` or restart Claude Code to load it.
 
 ## Enable plugins for everyone in a project
 
