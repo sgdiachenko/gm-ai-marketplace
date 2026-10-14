@@ -32,3 +32,23 @@ Entry template:
 - **Context:** writing release and rollback tooling.
 - **Insight:** `git revert` of a release lowers the plugin's `version`. `check-pr.mjs` rejects that, and since Claude Code caches by version, users who have the bad version may never get the old files back. Whether Claude Code moves users to a lower version at all is untested.
 - **Action:** `scripts/rollback.mjs` restores the old files under the next patch version above the current one (`docs/releasing.md`).
+
+## 2026-10-14 — Plugin agents ignore permissionMode
+- **Context:** porting the SDD agents from dev-digest into `sdd-engineering`.
+- **Insight:** Claude Code ignores `permissionMode`, `hooks`, `mcpServers` and `initialPrompt` in a plugin agent's frontmatter. The planner's `plan` mode and the implementer's `acceptEdits` don't carry over; only `tools` and `disallowedTools` restrict a plugin agent.
+- **Action:** read-only agents have no Write/Edit in their tool lists; the `sdd-engineering` README tells users the implementer follows the session's permission mode.
+
+## 2026-10-14 — Dependency ranges resolve against git tags
+- **Context:** making `sdd-engineering` depend on three plugins with `^1.0.0`.
+- **Insight:** a range in `dependencies` resolves against tags named `<plugin>--v<version>` in the repository that hosts the plugin — for relative-path plugins, this marketplace. Without a matching tag Claude Code installs the catalog's current copy and only checks the range at load time, disabling the dependent if it doesn't match. A `^1.0.0` range also means dependencies can't start at `0.1.0`.
+- **Action:** `scripts/tag-releases.mjs` tags every untagged plugin version on `main` (`tag-releases.yml`); `scripts/check-marketplace.mjs` checks that each range is satisfied by the catalog. The four SDD plugins start at `1.0.0`.
+
+## 2026-10-14 — Path variables are substituted in Markdown, not exported to Bash
+- **Context:** pointing `workflow-retro` at its bundled script and a user rate card.
+- **Insight:** `${CLAUDE_SKILL_DIR}`, `${CLAUDE_PLUGIN_ROOT}` and `${CLAUDE_PLUGIN_DATA}` are replaced inline in skill and agent Markdown, but commands Claude runs through the Bash tool don't get them as environment variables. A script can't read `CLAUDE_PLUGIN_DATA` itself.
+- **Action:** skills write the variable into the command line (`node "${CLAUDE_SKILL_DIR}/assets/collect.mjs" --prices "${CLAUDE_PLUGIN_DATA}/prices.json"`), and scripts take paths as arguments.
+
+## 2026-10-14 — claude plugin eval publishes reports by default
+- **Context:** porting dev-digest's evals to the built-in `claude plugin eval`.
+- **Insight:** the command publishes its HTML report to claude.ai unless given `--no-publish`, and its default baseline arm runs without the plugin, where namespaced agents don't exist and every dispatch fails.
+- **Action:** `scripts/run-evals.sh` always passes `--no-publish` and `--ablation none`.

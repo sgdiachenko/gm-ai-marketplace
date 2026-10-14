@@ -14,18 +14,22 @@ Claude Code plugin marketplace for the team, in a public repo. One repo = one ma
 - try one plugin while editing: `claude --plugin-dir plugins/<name>`, then `/reload-plugins`
 - install from a pushed branch the way users get it, in a throwaway profile: `scripts/try-install.sh <name> [branch]`
 - roll a plugin back to an earlier release: `node scripts/rollback.mjs <name> <version>`, never `git revert`
+- behaviour evals (paid, run by hand before a release): `scripts/run-evals.sh <suite>`
+- list release tags that would be created (CI pushes them on main): `node scripts/tag-releases.mjs`
 
 ## Map
 - `.claude-plugin/marketplace.json` — the catalog, one entry per plugin
 - `plugins/<name>/` — a plugin; everything in it ships to users
 - `scripts/` — validation used locally and in CI
-- `docs/` — maintainer and user docs
+- `docs/` — maintainer and user docs; per-plugin notes in `docs/plugins/<name>.md`
+- `evals/` — `claude plugin eval` suites; maintainer-only, never inside a plugin
 - `specs/` — specs for planned plugins and changes
 - `INSIGHTS.md` — lessons learned
 
 ## Conventions (non-default only)
 - Directory name = catalog entry `name` = `plugin.json` `name`, kebab-case; entry `source` is `./plugins/<name>`
-- `version` (semver) lives only in `plugins/<name>/.claude-plugin/plugin.json`; bump it in every PR that changes the plugin, README-only changes excepted
+- `version` (semver) lives only in `plugins/<name>/.claude-plugin/plugin.json`; bump it in every PR that changes the plugin, README- and CHANGELOG-only changes excepted; every release adds a `CHANGELOG.md` entry
+- A plugin that names another plugin's component (`<plugin>:<name>`) declares it in `dependencies` with a range; agents' `skills:` entries are always namespaced
 - Prefer skills over commands; keep SKILL.md tool-neutral for a future Codex port
 - Hooks and MCP configs reference bundled files as `"${CLAUDE_PLUGIN_ROOT}"/...`; persistent state goes to `${CLAUDE_PLUGIN_DATA}`
 - Maintainer-only files (AGENTS.md, INSIGHTS.md, docs, specs, tests) never go inside `plugins/<name>/`; per-plugin notes go to `docs/plugins/<name>.md`
