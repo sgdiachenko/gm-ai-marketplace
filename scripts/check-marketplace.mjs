@@ -16,12 +16,15 @@ const PLUGIN_ROOT_REF = /\$\{CLAUDE_PLUGIN_ROOT\}(?:\\?")?\/([\w./-]+)/g;
 const SKILL_DIR_REF = /\$\{CLAUDE_SKILL_DIR\}(?:\\?")?\/([\w./-]+)/g;
 // Plugins are shared across projects: no plugin may point at one project's files or at its own source layout.
 const FORBIDDEN_REF = /dev-?digest|\.claude\/(?:skills|agents)\//i;
+// SECURITY.md: no file in a plugin carries a path from one machine or a credential.
+const ABSOLUTE_HOME = /(?:\/Users\/|\/home\/|[A-Za-z]:\\Users\\)[\w.-]+/;
+const SECRET = /sk-ant-[\w-]{16,}|gh[pousr]_[A-Za-z0-9]{30,}|github_pat_\w{30,}|AKIA[0-9A-Z]{16}|xox[abprs]-[\w-]{10,}|-----BEGIN [A-Z ]*PRIVATE KEY-----/;
 // The repository is in English. Plugins, scripts, evals and workflows have no Cyrillic at all, code and
 // examples included; root docs may quote a non-English term only inside `code`.
 const CYRILLIC = /[\u0400-\u04FF]/;
 const CODE = /```[\s\S]*?```|`[^`\n]*`/g;
 const FRONTMATTER = /^---\n[\s\S]*?\n---/;
-const ROOT_DOCS = ['.claude-plugin/marketplace.json', 'README.md', 'AGENTS.md', 'INSIGHTS.md', 'docs', 'specs', 'site'];
+const ROOT_DOCS = ['.claude-plugin/marketplace.json', 'README.md', 'AGENTS.md', 'INSIGHTS.md', 'SECURITY.md', 'CONTRIBUTING.md', 'docs', 'specs', 'site'];
 const STRICT_ENGLISH = ['scripts', 'evals', '.github'];
 
 const errors = [];
@@ -213,6 +216,12 @@ function checkFile(file, pluginDir) {
   if (line !== -1) {
     fail(`${rel(file)}:${line + 1}: names "${FORBIDDEN_REF.exec(text)[0]}"; plugins are shared, so take project paths from inputs and call skills and agents by <plugin>:<name>`);
   }
+  const home = text.split('\n').findIndex((l) => ABSOLUTE_HOME.test(l));
+  if (home !== -1) {
+    fail(`${rel(file)}:${home + 1}: absolute path "${ABSOLUTE_HOME.exec(text)[0]}"; use \${CLAUDE_PLUGIN_ROOT}, \${CLAUDE_SKILL_DIR}, \${CLAUDE_PLUGIN_DATA} or a path from the input (SECURITY.md)`);
+  }
+  const secret = text.split('\n').findIndex((l) => SECRET.test(l));
+  if (secret !== -1) fail(`${rel(file)}:${secret + 1}: looks like a credential; plugins never carry secrets (SECURITY.md)`);
 }
 
 function checkPlugin(entry, where) {

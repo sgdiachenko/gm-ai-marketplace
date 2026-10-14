@@ -14,7 +14,9 @@ Claude Code plugin marketplace for the team, in a public repo. One repo = one ma
 - try one plugin while editing: `claude --plugin-dir plugins/<name>`, then `/reload-plugins`
 - install from a pushed branch the way users get it, in a throwaway profile: `scripts/try-install.sh <name> [branch]`
 - roll a plugin back to an earlier release: `node scripts/rollback.mjs <name> <version>`, never `git revert`
-- behaviour evals (paid, run by hand before a release): `scripts/run-evals.sh <suite>`
+- behaviour evals (paid, run by hand before a release): `scripts/run-evals.sh <suite> [max-cost-usd] [eval options]`
+- compare two eval runs and apply the cost quality gate: `node scripts/compare-evals.mjs <baseline-dir> <candidate-dir>`
+- which plugin versions a session actually loads, from its telemetry: `node scripts/trace-plugin-version.mjs [project-dir]`
 - list release tags that would be created (CI pushes them on main): `node scripts/tag-releases.mjs`
 - catalog site, checked by the separate Site workflow: develop with `node site/dev.mjs`, test with `node --test site/tests/*.test.mjs`, build with `node site/build.mjs`
 
@@ -46,6 +48,8 @@ Claude Code plugin marketplace for the team, in a public repo. One repo = one ma
 - Plugin names starting with `claude-` or `anthropic-` fail validation
 - A newer Claude Code can add validation rules that fail `--strict`; bump the CI pin in its own PR
 
+- The `stable` branch is the stable channel: `main` at a promoted commit plus a catalog renamed to `gm-ai-marketplace-stable`. Promote by merging `main` into it in a PR; never merge `stable` into `main`
+
 ## Do not touch
 - `renames` in `.claude-plugin/marketplace.json` — append-only history that migrates installed users
 
@@ -57,4 +61,6 @@ Claude Code plugin marketplace for the team, in a public repo. One repo = one ma
 - Read `docs/codex-compatibility.md` before writing skills or hooks, and before adding Codex support.
 - Read the relevant file in `specs/` before implementing a plugin or feature.
 - Read `site/README.md` before changing the catalog site or the way plugins declare components.
+- Read `SECURITY.md` before adding hooks, MCP servers, network access or anything that handles credentials.
+- Read `docs/COST-BASELINE.md` before changing an agent prompt or a model choice in `sdd-engineering`.
 - Read `INSIGHTS.md` before changing this repo; append a new entry when you learn something non-obvious.
