@@ -20,7 +20,9 @@ export const TYPE_ICONS = {
 export const icon = (root, name, cls = '') =>
   `<svg class="icon${cls ? ` ${cls}` : ''}" aria-hidden="true" focusable="false"><use href="${root}assets/icons.svg#${name}"></use></svg>`;
 
-export const installCommand = (plugin, repo) => `claude plugin install ${plugin} --marketplace ${repo}`;
+// The one-step install: in a Claude Code session, which is what cards copy, and in a shell.
+export const claudeInstallCommand = (plugin, repo) => `/plugin install ${plugin} --marketplace ${repo}`;
+export const shellInstallCommand = (plugin, repo) => `claude plugin install ${plugin} --marketplace ${repo}`;
 
 const marked = (value, words) =>
   highlight(value, words)
@@ -72,7 +74,7 @@ export function card(item, { root, t, words = [], repo }) {
   if (item.plugin) {
     actions.push(
       `<span class="card-buttons">${copyButton(root, t, {
-        value: installCommand(item.plugin, repo),
+        value: claudeInstallCommand(item.plugin, repo),
         label: t.card.copyInstall,
         message: text(t, t.card.installCopied, { plugin: item.plugin }),
         cls: 'btn btn-small',

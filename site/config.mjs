@@ -6,7 +6,9 @@ export const GITHUB = `https://github.com/${REPO}`;
 // paths, so only 404.html, which GitHub serves at any depth, needs this absolute prefix.
 export const BASE_PATH = '/gm-ai-marketplace/';
 export const SITE_URL = `https://sgdiachenko.github.io${BASE_PATH}`;
-// The first Claude Code release with `claude plugin install --marketplace` (docs/installing.md).
+// The first Claude Code releases with the one-step install (docs/installing.md): `/plugin install
+// <plugin> --marketplace <repo>` in a session, and `claude plugin install … --marketplace` in a shell.
 export const MIN_CLAUDE_CODE = '2.1.275';
+export const MIN_CLAUDE_CODE_SHELL = '2.1.292';
 // Which file in site/i18n/ holds the UI strings.
 export const LOCALE = 'en';

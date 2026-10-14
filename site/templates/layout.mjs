@@ -1,8 +1,8 @@
 // The page shell and the pieces several pages share. Every URL is relative to `root`,
 // the path from the page to the site root, so the site works under any base path.
 // All UI text comes from `t`, the strings in site/i18n/<locale>.json.
-import { BRANCH, GITHUB, MIN_CLAUDE_CODE, REPO, SITE_URL } from '../config.mjs';
-import { copyButton, esc, icon, installCommand } from '../assets/render.js';
+import { BRANCH, GITHUB, MIN_CLAUDE_CODE, MIN_CLAUDE_CODE_SHELL, REPO, SITE_URL } from '../config.mjs';
+import { claudeInstallCommand, copyButton, esc, icon, shellInstallCommand } from '../assets/render.js';
 import { formatDate, html, text } from '../assets/text.js';
 
 // Only the site's own origin; inline scripts and style attributes are off too.
@@ -99,11 +99,12 @@ const settingsSnippet = (plugin, marketplace) =>
     2,
   );
 
-// The install box: three tabs with JavaScript, three labelled blocks without.
+// The install box: three tabs with JavaScript, three labelled blocks without. The Claude Code tab
+// comes first, matching what the cards' Copy install copies.
 export function installBox(root, t, plugin, marketplace, { heading = t.install.heading, compact = false, id = 'install' } = {}) {
   const tabs = [
-    { key: 'terminal', label: t.install.terminal, note: t.install.terminalNote, code: installCommand(plugin, REPO), copied: t.install.commandCopied },
-    { key: 'claude', label: t.install.claude, note: t.install.claudeNote, code: `/plugin install ${plugin} --marketplace ${REPO}`, copied: t.install.commandCopied },
+    { key: 'claude', label: t.install.claude, note: text(t, t.install.claudeNote, { version: MIN_CLAUDE_CODE }), code: claudeInstallCommand(plugin, REPO), copied: t.install.commandCopied },
+    { key: 'terminal', label: t.install.terminal, note: text(t, t.install.terminalNote, { version: MIN_CLAUDE_CODE_SHELL }), code: shellInstallCommand(plugin, REPO), copied: t.install.commandCopied },
     { key: 'project', label: t.install.project, note: t.install.projectNote, code: settingsSnippet(plugin, marketplace), copied: t.install.snippetCopied },
   ];
   const tablist = `<div class="tabs js-only" role="tablist" aria-label="${esc(t.install.method)}">${tabs
@@ -125,7 +126,7 @@ export function installBox(root, t, plugin, marketplace, { heading = t.install.h
   <h2 id="${id}-h">${esc(heading)}</h2>
   ${tablist}
   ${panels}
-  <p class="install-foot">${esc(text(t, t.install.requires, { version: MIN_CLAUDE_CODE }))} ${esc(t.install.trouble)} <a href="${root}guides/installing/">${esc(t.install.troubleLink)}</a></p>
+  <p class="install-foot">${esc(t.install.trouble)} <a href="${root}guides/installing/">${esc(t.install.troubleLink)}</a></p>
 </section>`;
 }
 

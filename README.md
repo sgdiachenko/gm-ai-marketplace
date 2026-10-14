@@ -18,7 +18,7 @@ Then install a plugin:
 
 `<plugin>` is a name from the table below, the `name` of an entry in `.claude-plugin/marketplace.json`; `gm-ai-marketplace` is the catalog name. `/plugin` on its own browses the catalog.
 
-From a terminal, one command does both (Claude Code 2.1.275 or later):
+From a terminal, one command does both (Claude Code 2.1.292 or later):
 
 ```bash
 claude plugin install <plugin> --marketplace sgdiachenko/gm-ai-marketplace
