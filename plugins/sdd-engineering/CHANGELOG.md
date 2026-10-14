@@ -6,6 +6,14 @@ All notable changes to `sdd-engineering`. Versions follow [semver](https://semve
 - **minor** — a new agent, skill, mode or profile field that existing projects can ignore;
 - **major** — a renamed or removed agent or skill, a changed artifact format or path, a profile field that projects must update.
 
+## 1.1.0 — 2026-10-14
+
+### Added
+
+- `spec-creator` coverage gate: a spec isn't finished while a `must` user story has no acceptance criterion. `write` and `revise` give every `must` story an AC, with a `[NEEDS CLARIFICATION]` marker and a blocking question when its behaviour is still open; `approve` refuses such a spec even with the user's approval and leaves it `draft`, so `implementation-planner` never receives it.
+- A `Coverage: complete | incomplete — US-n (…)` line in every spec report, and `approval refused` as a report outcome. Existing report fields and the spec format are unchanged.
+- `COMPATIBILITY.md`: the Claude Code versions and platform features the plugin relies on.
+
 ## 1.0.0 — 2026-10-14
 
 First release, ported from the team's in-repo workflow and made project-neutral.

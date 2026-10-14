@@ -360,9 +360,30 @@ the end. Update *Traceability* and the registry row's title if it changed.
 ## Mode `approve`
 
 Only when the prompt says the user explicitly approved `<spec ID>`. Run the
-*Final self-check*; if it passes, change `Status: draft` →
-`Status: approved` in the spec and in its registry row, and nothing else.
-If it fails, don't approve — report the failing items.
+*Coverage gate* and the *Final self-check*; if both pass, change
+`Status: draft` → `Status: approved` in the spec and in its registry row,
+and nothing else. If either fails, don't approve — report
+`Approval refused` and the failing items.
+
+## Coverage gate (write / revise / approve)
+
+A spec isn't finished while a mandatory requirement has no acceptance
+criterion. Mandatory means a `must` user story (`US-n [must]: …`),
+including one the user made mandatory in a `Q#` answer.
+
+- **`write` / `revise`** — before returning, give every `must` story at
+  least one `AC` line whose story field names it. When the request, the
+  answers and the research don't settle the behaviour, write the AC with a
+  `[NEEDS CLARIFICATION: …]` marker and a blocking `Q-n` rather than leave
+  the story without one. A story whose only ACs carry a marker is still
+  uncovered.
+- **`approve`** — when any `must` story is uncovered, don't approve, even
+  though the user approved: leave `Status: draft` in the spec and in the
+  registry and report `Approval refused`. Only a `revise` that adds the AC,
+  or an answer that lowers the story to `should` / `could` or moves it to
+  *Non-goals*, lifts the gate.
+- **Report** — every report carries `Coverage: complete`, or
+  `Coverage: incomplete — US-n (<why>), …` naming each uncovered story.
 
 ## Final self-check (before returning from write / revise / approve)
 
@@ -370,6 +391,7 @@ Run the `ears-requirements` self-check, then these; report each line as
 `pass` or `fail — <where>`:
 
 - [ ] Every `US` is covered by ≥1 AC; *Traceability* has no orphan ID.
+- [ ] Every `must` story has an AC without a marker (*Coverage gate*).
 - [ ] Every AC has ID, pattern, story, priority and `verify:`; contains
       **shall**; one response; no banned vague word without a number.
 - [ ] Every failure found in `analyze` has an unwanted-behaviour AC or EC.
@@ -392,9 +414,10 @@ Run the `ears-requirements` self-check, then these; report each line as
 
 ```
 ## Spec report — <spec ID>
-File: <specs>/<YYYY-MM-DD>-<slug>.md — created | revised | approved
-Registry: <specs>/README.md — row added | updated
+File: <specs>/<YYYY-MM-DD>-<slug>.md — created | revised | approved | approval refused
+Registry: <specs>/README.md — row added | updated | unchanged
 Status: draft | approved
+Coverage: complete | incomplete — US-n (<why>), …
 Counts: US n · AC n (ubiquitous n, event n, state n, unwanted n, optional n, complex n) · EC n · NFR n
 Verify mix: unit n · integration n · e2e n · manual n
 Decisions applied: Q1 → …, UX-2 accepted, EC-4 rejected → Non-goal, RQ1 → …

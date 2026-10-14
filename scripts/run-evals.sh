@@ -36,13 +36,16 @@ if ! command -v claude >/dev/null 2>&1; then
   exit 1
 fi
 
-# cost-workflow seeds a fixture project (its own fixture.sh, so --scaffold is safe), lets the flow
-# write the spec and the plan, keeps each run's trace for token and tool-call counts
-# (scripts/compare-evals.mjs reads them), and pins the orchestrating session's model so runs stay
-# comparable; the agents keep the models their frontmatter sets.
-if [ "$suite" = cost-workflow ]; then
-  set -- --scaffold --keep-temp --model sonnet --allow-tools Write Edit "$@"
-fi
+# Every case here is ours, so its fixture.sh may run (--scaffold). sdd-engineering grants Write and
+# Edit, so "analyze writes nothing" and "approve refuses" test the agent, not a missing tool.
+# cost-workflow also lets the flow write the spec and the plan, keeps each run's transcripts for
+# token and tool-call counts (scripts/compare-evals.mjs reads them), and pins the orchestrating
+# session's model so runs stay comparable; the agents keep the models their frontmatter sets.
+case "$suite" in
+  sdd-engineering) set -- --allow-tools Write Edit "$@" ;;
+  cost-workflow) set -- --keep-temp --model sonnet --allow-tools Write Edit "$@" ;;
+esac
+set -- --scaffold "$@"
 
 stamp="$(date +%Y%m%d-%H%M%S)"
 out="evals/results/$stamp/$suite"

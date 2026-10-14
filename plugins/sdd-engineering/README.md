@@ -60,7 +60,7 @@ The main session — your chat — orchestrates. Subagents can't ask you questio
 
 | Agent | Model | Does | Writes |
 |---|---|---|---|
-| `sdd-engineering:spec-creator` | Opus | **analyze**: design gaps, edge cases, module communication, UX proposals, untrusted inputs, research requests and questions; **write / revise / approve**: the dated spec | `<specs>/<YYYY-MM-DD>-<slug>.md`, the registry `<specs>/README.md` |
+| `sdd-engineering:spec-creator` | Opus | **analyze**: design gaps, edge cases, module communication, UX proposals, untrusted inputs, research requests and questions; **write / revise / approve**: the dated spec; `approve` refuses a spec whose `must` story has no acceptance criterion | `<specs>/<YYYY-MM-DD>-<slug>.md`, the registry `<specs>/README.md` |
 | `sdd-engineering:implementation-planner` | Opus | **pass 1**: spec conflicts, recommendations, execution mode (multi-agent or single-agent); **pass 2**: the Implementation Plan | nothing (read-only) |
 | `sdd-engineering:implementer` | Sonnet | executes the plan or one work package, writes the plan's tests, runs the checks, reports per step | the files its steps name |
 | `sdd-engineering:plan-verifier` | Sonnet | traceability matrix: every AC, EC, NFR, constraint, step and test gets met / partial / unmet / not-verifiable with evidence | `<plans>/<slug>.verification.md` |
