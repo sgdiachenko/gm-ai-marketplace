@@ -40,9 +40,8 @@ fi
 # write the spec and the plan, keeps each run's trace for token and tool-call counts
 # (scripts/compare-evals.mjs reads them), and pins the orchestrating session's model so runs stay
 # comparable; the agents keep the models their frontmatter sets.
-suite_args=""
 if [ "$suite" = cost-workflow ]; then
-  suite_args="--scaffold --keep-temp --model sonnet --allow-tools Write Edit"
+  set -- --scaffold --keep-temp --model sonnet --allow-tools Write Edit "$@"
 fi
 
 stamp="$(date +%Y%m%d-%H%M%S)"
@@ -63,7 +62,7 @@ if claude plugin eval . \
   --trust-plugin \
   --max-cost-usd "$ceiling" \
   --output-dir "$out" \
-  $suite_args "$@"; then
+  "$@"; then
   status=0
 else
   status=1
