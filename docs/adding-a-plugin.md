@@ -7,7 +7,7 @@
    ```bash
    cp -R plugins/example plugins/<name>
    ```
-3. In `plugins/<name>/.claude-plugin/plugin.json`, set `name` and `description`, and reset `version` to `0.1.0`.
+3. In `plugins/<name>/.claude-plugin/plugin.json`, set `name` and `description`, and reset `version` to `0.1.0`. Start CHANGELOG.md with a `## 0.1.0 — <date>` entry. If the plugin uses another plugin's skills or agents, add `dependencies` (see *Dependencies* below).
 4. Add an entry to `.claude-plugin/marketplace.json`. Leave `version` out; it lives only in `plugin.json`.
    ```json
    {
@@ -38,7 +38,8 @@ plugins/<name>/
 ├── hooks/hooks.json
 ├── .mcp.json
 ├── scripts/              executables called from hooks or MCP configs
-└── README.md
+├── README.md             what it is for, install, each component and how to call it, limits
+└── CHANGELOG.md          one "## <version> — <date>" entry per release
 ```
 
 Claude Code finds these locations without any manifest field. Component folders placed inside `.claude-plugin/` are silently ignored.
@@ -68,3 +69,14 @@ Claude Code finds these locations without any manifest field. Component folders 
 **Context cost.** Every skill and agent description loads into each session, used or not. Keep descriptions short and check the cost with `claude plugin details <name>`. For heavy plugins, or plugins that call external services, set `"defaultEnabled": false` in the catalog entry so users opt in.
 
 **Secrets.** Never commit credentials. Ask users for them through `userConfig` with `"sensitive": true`, which stores the value in the system keychain.
+
+**Dependencies and namespaces.** Refer to another plugin's components by namespaced name: `engineering-paved-path:onion-architecture` for a skill, `research-tools:researcher` for an agent. In an agent's `skills:` list every entry is namespaced, its own plugin's skills included. Declare each plugin you name in `dependencies` with a range, and release dependencies before dependents (see `docs/releasing.md`). Bundled files a skill runs are called through `${CLAUDE_SKILL_DIR}`, never through `.claude/skills/`.
+
+**Where a shared skill goes.** A skill that more than one plugin uses, or that describes a stack practice, belongs in `engineering-paved-path`. A skill with a single consumer ships inside that consumer.
+
+**No project-bound content.** Plugins are shared across projects. Don't hardcode one project's paths, commands or names in an agent or skill; take them from inputs such as the SDD project profile (`docs/sdd-profile.md` in the user's project). `scripts/check-marketplace.mjs` rejects references to `.claude/skills/` and `.claude/agents/` paths inside plugins.
+
+**Evals.** Behaviour tests in the `claude plugin eval` format live in `evals/<suite>/` at the repository root, never inside a plugin. See `evals/README.md`.
+
+**English only.** Everything in a plugin is in English: skill and agent bodies, examples, comments, scripts and user-facing text. A plugin may tell agents to write into a user's project in another language, but its own files stay English. `scripts/check-marketplace.mjs` rejects any Cyrillic in `plugins/`.
+
