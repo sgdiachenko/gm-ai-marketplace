@@ -1,0 +1,14 @@
+{
+  "name": "architecture-review",
+  "displayName": "Architecture review",
+  "version": "1.0.0",
+  "description": "Read-only architecture-reviewer agent: checks a diff for dependency direction, layering and module boundaries",
+  "author": {
+    "name": "Serhii Diachenko"
+  },
+  "repository": "https://github.com/sgdiachenko/gm-ai-marketplace",
+  "keywords": ["architecture", "review", "layering", "onion", "boundaries"],
+  "dependencies": [
+    { "name": "engineering-paved-path", "version": "^1.0.0" }
+  ]
+}

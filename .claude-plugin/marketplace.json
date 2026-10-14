@@ -28,6 +28,15 @@
       "author": {
         "name": "Serhii Diachenko"
       }
+    },
+    {
+      "name": "architecture-review",
+      "source": "./plugins/architecture-review",
+      "description": "Read-only architecture-reviewer agent: dependency direction, layering and module boundaries in a diff",
+      "category": "engineering",
+      "author": {
+        "name": "Serhii Diachenko"
+      }
     }
   ]
 }
