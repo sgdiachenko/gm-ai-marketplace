@@ -1,0 +1,2 @@
+# LF everywhere: plugin scripts run on macOS and Linux, CRLF breaks shebangs.
+* text=auto eol=lf

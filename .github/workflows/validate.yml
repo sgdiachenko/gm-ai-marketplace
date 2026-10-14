@@ -1,0 +1,44 @@
+name: Validate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Pinned on purpose: newer Claude Code versions add validation rules that can fail --strict.
+  # Bump in a separate PR after running scripts/validate.sh with the new version locally.
+  CLAUDE_CODE_VERSION: "2.1.296"
+  DISABLE_AUTOUPDATER: "1"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # check-pr.mjs diffs against the base branch
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Install Claude Code
+        run: npm install --global "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
+
+      - name: Validate marketplace, plugins and conventions
+        run: scripts/validate.sh
+
+      - name: Check version bumps and renames
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: node scripts/check-pr.mjs "origin/${BASE_REF}"

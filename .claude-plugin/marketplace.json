@@ -1,0 +1,15 @@
+{
+  "name": "gm-ai-marketplace",
+  "description": "Claude Code plugins for the team",
+  "owner": {
+    "name": "Serhii Diachenko"
+  },
+  "plugins": [
+    {
+      "name": "example",
+      "source": "./plugins/example",
+      "description": "Template plugin: copy it to start a new one",
+      "category": "templates"
+    }
+  ]
+}

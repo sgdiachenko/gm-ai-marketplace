@@ -1,0 +1,53 @@
+# gm-ai-marketplace — AGENTS.md
+
+Claude Code plugin marketplace for the team, in a public repo. One repo = one marketplace named `gm-ai-marketplace`; each plugin lives in `plugins/<name>/`.
+
+## Stack
+- Claude Code plugin marketplace format; CI pins Claude Code 2.1.296 (`.github/workflows/validate.yml`)
+- Node.js 20+ for repo scripts, no npm dependencies
+- Bash 3.2-compatible shell (stock macOS)
+- GitHub Actions
+
+## Commands
+- validate everything, same as CI: `scripts/validate.sh`
+- version bumps and renames vs base: `node scripts/check-pr.mjs origin/main`
+- try one plugin while editing: `claude --plugin-dir plugins/<name>`, then `/reload-plugins`
+- install from a pushed branch the way users get it, in a throwaway profile: `scripts/try-install.sh <name> [branch]`
+- roll a plugin back to an earlier release: `node scripts/rollback.mjs <name> <version>`, never `git revert`
+
+## Map
+- `.claude-plugin/marketplace.json` — the catalog, one entry per plugin
+- `plugins/<name>/` — a plugin; everything in it ships to users
+- `scripts/` — validation used locally and in CI
+- `docs/` — maintainer and user docs
+- `specs/` — specs for planned plugins and changes
+- `INSIGHTS.md` — lessons learned
+
+## Conventions (non-default only)
+- Directory name = catalog entry `name` = `plugin.json` `name`, kebab-case; entry `source` is `./plugins/<name>`
+- `version` (semver) lives only in `plugins/<name>/.claude-plugin/plugin.json`; bump it in every PR that changes the plugin, README-only changes excepted
+- Prefer skills over commands; keep SKILL.md tool-neutral for a future Codex port
+- Hooks and MCP configs reference bundled files as `"${CLAUDE_PLUGIN_ROOT}"/...`; persistent state goes to `${CLAUDE_PLUGIN_DATA}`
+- Maintainer-only files (AGENTS.md, INSIGHTS.md, docs, specs, tests) never go inside `plugins/<name>/`; per-plugin notes go to `docs/plugins/<name>.md`
+- Repo docs and catalog metadata (catalog, `plugin.json`, skill/agent/command frontmatter, plugin READMEs) are in English; `scripts/check-marketplace.mjs` rejects Cyrillic outside code spans
+
+## Gotchas
+- Users get a plugin change only when its `version` changes; Claude Code caches plugins by version
+- A marketplace added from a local path loads plugins in place and ignores `version`, so it hides caching and path bugs
+- Installed plugins are copied to a cache: paths that leave the plugin directory (`../`) break
+- Renaming or removing a plugin breaks existing installs unless `renames` in the catalog maps the old name
+- Do not add CLAUDE.md to this repo: when one exists, Claude Code ignores AGENTS.md
+- Plugin names starting with `claude-` or `anthropic-` fail validation
+- A newer Claude Code can add validation rules that fail `--strict`; bump the CI pin in its own PR
+
+## Do not touch
+- `renames` in `.claude-plugin/marketplace.json` — append-only history that migrates installed users
+
+## Read when…
+- Read `README.md` when you need the user-facing overview or the plugin list.
+- Read `docs/adding-a-plugin.md` before creating a plugin or changing a plugin's layout.
+- Read `docs/releasing.md` before bumping a version, rolling back, renaming or removing a plugin.
+- Read `docs/installing.md` when changing install instructions, git access or team rollout.
+- Read `docs/codex-compatibility.md` before writing skills or hooks, and before adding Codex support.
+- Read the relevant file in `specs/` before implementing a plugin or feature.
+- Read `INSIGHTS.md` before changing this repo; append a new entry when you learn something non-obvious.
