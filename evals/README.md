@@ -7,7 +7,7 @@ Behaviour tests for the SDD plugins, in the format of Claude Code's built-in [`c
 | Suite | What it checks | Graders | Approximate cost |
 |---|---|---|---|
 | `namespaces` | each skill and agent is reachable by its namespaced name: `engineering-paved-path:<skill>`, `research-tools:researcher`, `architecture-review:architecture-reviewer`, the four `sdd-engineering` agents | `tool_used` only (free) | one run per case |
-| `sdd-engineering` | `spec-creator` in analyze mode asks numbered questions and writes no file; `/run-plan` without a plan points to the planner and starts no implementer; a small edit that needs no spec starts no `sdd-engineering` agent or skill (negative case) | `tool_used`, `file_exists`, `regex` (free) | two runs per case |
+| `sdd-engineering` | `spec-creator` in analyze mode asks numbered questions and writes no file; `/run-plan` without a plan points to the planner and starts no implementer; a small edit that needs no spec starts no `sdd-engineering` agent or skill (negative case); `spec-creator` refuses to approve a spec whose `must` story has no AC, even with the user's approval, and names the story in its `Coverage:` line (1.1.0) | `tool_used`, `file_exists`, `regex` (free) | two runs per case |
 | `architecture-review` | the reviewer finds a framework import in the domain ring and a concrete repository built in a service, flags filesystem access in the pure core, and approves a harmless rename | `tool_used` + `llm` judge | three runs per case, plus judge calls |
 | `cost-workflow` | the fixed cost scenario of `docs/COST-BASELINE.md`: in a seeded Next.js project, the user asks for a spec and a plan for a small feature; `spec-creator` analyze → write → approve, then `implementation-planner` pass 1 → pass 2; the spec is approved and has AC lines, the plan is saved and has steps | `tool_used`, `tool_order`, `file_exists`, `regex` (free) | three runs; the most expensive suite, since both agents run on Opus |
 
@@ -29,7 +29,7 @@ The script runs `claude plugin eval .` from the repository root with `--tag <sui
 - `--judge-model sonnet` — with the default Haiku judge, `llm` graders failed reviews that met their rubric;
 - `--trust-plugin` and `--max-cost-usd`.
 
-For `cost-workflow` it adds `--scaffold` (the case's own `fixture.sh` seeds the project), `--allow-tools Write Edit` (the flow writes the spec and the plan), `--keep-temp` (each run's transcripts stay in `/tmp/e-*` for token and tool-call counts) and `--model sonnet` for the orchestrating session; the agents keep the models in their frontmatter. Compare two of its runs with `node scripts/compare-evals.mjs <baseline-dir> <candidate-dir>`, which also applies the quality gate of `docs/COST-BASELINE.md`.
+It passes `--scaffold` to every suite: a case's `fixture.sh` seeds its workspace, and every case here is ours. For `sdd-engineering` it grants `Write` and `Edit`, so a case that expects an agent not to write or not to approve checks the agent rather than a missing tool. For `cost-workflow` it grants `Write` and `Edit` (the flow writes the spec and the plan) and adds `--keep-temp` (each run's transcripts stay in `/tmp/e-*` for token and tool-call counts) and `--model sonnet` for the orchestrating session; the agents keep the models in their frontmatter. Compare two of its runs with `node scripts/compare-evals.mjs <baseline-dir> <candidate-dir>`, which also applies the quality gate of `docs/COST-BASELINE.md`.
 
 Reports go to `evals/results/<timestamp>/<suite>/`, which git ignores. To run one case: add `--case <name>` to the same command.
 

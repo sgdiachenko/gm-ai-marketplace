@@ -115,3 +115,42 @@ Open the pull request against `stable`; CI validates it, and `check-pr.mjs` comp
 
 - **Dependencies.** A range such as `^1.0.0` resolves against the `<plugin>--v<version>` tags of the whole repository, not of the channel's branch. A stable plugin therefore picks up the newest dependency tag in its range as soon as that tag exists on `main`, promoted or not. A dependency change that stable users must not get yet needs a new major version, outside the range.
 - **Plugin data.** `${CLAUDE_PLUGIN_DATA}` is `~/.claude/plugins/data/<plugin>-<marketplace>/`, so each channel has its own directory. Moving between channels doesn't carry state such as the `workflow-retro` rate card (`prices.json`); copy it.
+
+### Move a project to stable, and back
+
+The rollback path when a latest release misbehaves in a project, without a new release and without the nonexistent `plugin rollback`. Rehearsed on Claude Code 2.1.299 in a project with `sdd-engineering` at project scope. Disable dependents before their dependencies, and enable in the reverse order: `claude plugin disable` refuses a plugin another enabled plugin still requires.
+
+```bash
+# 1. Turn the latest channel off. Disable, don't uninstall: uninstall deletes the plugin's data directory.
+for p in sdd-engineering architecture-review research-tools engineering-paved-path; do
+  claude plugin disable "$p@gm-ai-marketplace" --scope project
+done
+
+# 2. Add the stable channel and install from it; its dependencies come along.
+claude plugin marketplace add 'sgdiachenko/gm-ai-marketplace#stable' --scope project
+claude plugin install sdd-engineering@gm-ai-marketplace-stable --scope project
+
+# 3. Carry the plugin's data over, if it has any.
+src=~/.claude/plugins/data/sdd-engineering-gm-ai-marketplace
+[ -d "$src" ] && mkdir -p "$src-stable" && cp -R "$src"/. "$src-stable"/
+
+# 4. Check: the stable copies are enabled, the latest ones disabled, no dependency errors,
+#    and the session loads stable.
+claude plugin list --json
+node scripts/trace-plugin-version.mjs <project-dir>      # run from this repository
+```
+
+In an open session, run `/reload-plugins`. Then run the smoke suite on the stable branch's files, which are what the stable install copied: `git switch --detach origin/stable && scripts/run-evals.sh namespaces`.
+
+To return to latest once a fixed release is out, disable the stable copies and enable the latest ones; the latest data directory is still there because step 1 only disabled it:
+
+```bash
+for p in sdd-engineering architecture-review research-tools engineering-paved-path; do
+  claude plugin disable "$p@gm-ai-marketplace-stable" --scope project
+done
+for p in engineering-paved-path research-tools architecture-review sdd-engineering; do
+  claude plugin enable "$p@gm-ai-marketplace" --scope project
+done
+```
+
+Commit `.claude/settings.json` after each switch so the whole team moves together. External state: the SDD plugins write only files in the project (specs, plans, verification reports, retros), which git restores; they call no external service.

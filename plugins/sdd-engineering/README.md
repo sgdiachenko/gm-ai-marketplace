@@ -60,7 +60,7 @@ The main session — your chat — orchestrates. Subagents can't ask you questio
 
 | Agent | Model | Does | Writes |
 |---|---|---|---|
-| `sdd-engineering:spec-creator` | Opus | **analyze**: design gaps, edge cases, module communication, UX proposals, untrusted inputs, research requests and questions; **write / revise / approve**: the dated spec | `<specs>/<YYYY-MM-DD>-<slug>.md`, the registry `<specs>/README.md` |
+| `sdd-engineering:spec-creator` | Opus | **analyze**: design gaps, edge cases, module communication, UX proposals, untrusted inputs, research requests and questions; **write / revise / approve**: the dated spec; `approve` refuses a spec whose `must` story has no acceptance criterion | `<specs>/<YYYY-MM-DD>-<slug>.md`, the registry `<specs>/README.md` |
 | `sdd-engineering:implementation-planner` | Opus | **pass 1**: spec conflicts, recommendations, execution mode (multi-agent or single-agent); **pass 2**: the Implementation Plan | nothing (read-only) |
 | `sdd-engineering:implementer` | Sonnet | executes the plan or one work package, writes the plan's tests, runs the checks, reports per step | the files its steps name |
 | `sdd-engineering:plan-verifier` | Sonnet | traceability matrix: every AC, EC, NFR, constraint, step and test gets met / partial / unmet / not-verifiable with evidence | `<plans>/<slug>.verification.md` |
@@ -123,7 +123,7 @@ Review the draft. Ask for changes with `revise` mode, and when it is right: "Use
 Use sdd-engineering:implementation-planner, pass 1. Spec: docs/specs/2026-10-14-order-cancel.md
 ```
 
-Answer the recommendations and choose the execution mode. Then run pass 2 with `Mode: multi-agent` (or `single-agent`) and your `REC#` decisions. Save the approved plan to `docs/plans/order-cancel.md`.
+Save the pass-1 report, for example to `docs/plans/order-cancel.pass1.md`: pass 2 reads the `REC#` text from that file and won't restate it from memory. Answer the recommendations and choose the execution mode. Then run pass 2 with the report's path, `Mode: multi-agent` (or `single-agent`) and your `REC#` decisions. Save the approved plan to `docs/plans/order-cancel.md`.
 
 ### 3. Run the plan
 

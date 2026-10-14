@@ -29,6 +29,14 @@ Not ported, by decision (see the spec's non-goals): `brainstorm`, `test-writer`,
 - Skills with `disable-model-invocation: true` (`run-plan`, `workflow-retro`) run only when typed and can't be preloaded by an agent.
 - Whether an agent's `skills:` list preloads a skill from a dependency plugin by its namespaced name is not documented. The `namespaces` eval suite checks reachability; if preloading turns out not to work, agents still load the skills through the Skill tool.
 
+## Coverage gate (1.1.0)
+
+`spec-creator` doesn't finish a spec while a `must` story has no acceptance criterion: `write` and `revise` add one (with a `[NEEDS CLARIFICATION]` marker when the behaviour is open), and `approve` refuses even with the user's approval. `implementation-planner` already returns a `draft` spec as `SC1`, so an uncovered spec never reaches a plan. Checked by `evals/sdd-engineering/spec-approve-blocks-uncovered`. The 1.0.0 approve ran a self-check that also covered stories, but nothing made it binding and no report line named the gaps.
+
+## Cost
+
+`docs/COST-BASELINE.md`: the fixed spec-and-plan scenario costs $2.14 per successful run on 1.0.0. Removing the instructions `spec-creator` repeats from `ears-requirements` failed the quality gate (more revise rounds, one run without a plan) and did not ship; keep the writer-facing EARS rules in the prompt.
+
 ## Context cost
 
 Measured with `claude plugin details sdd-engineering` on Claude Code 2.1.299: ~1,120 tokens always-on for 4 agents and 5 skills; on invoke from ~2.4k (`ux-design-review`) to ~7.7k (`spec-creator`). With its three dependencies, installing `sdd-engineering` adds ~2,300 tokens to every session.
