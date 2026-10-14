@@ -15,7 +15,8 @@ concurrency:
 
 env:
   # Pinned on purpose: newer Claude Code versions add validation rules that can fail --strict.
-  # Bump in a separate PR after running scripts/validate.sh with the new version locally.
+  # Bump in a separate PR after running scripts/validate.sh with the new version locally,
+  # together with the same pin in site.yml.
   CLAUDE_CODE_VERSION: "2.1.296"
   DISABLE_AUTOUPDATER: "1"
 

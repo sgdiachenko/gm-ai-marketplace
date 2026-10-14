@@ -1,0 +1,79 @@
+name: Site
+
+# The catalog site (site/), separate from the marketplace checks in validate.yml:
+# - "Build and test the site" runs on every pull request and push, so its result shows as its own check;
+# - "Deploy to GitHub Pages" publishes the build from main to https://sgdiachenko.github.io/gm-ai-marketplace/.
+# One-time setup: repository Settings → Pages → Source: GitHub Actions.
+
+on:
+  pull_request:
+  # No path filter on main: the build takes seconds, and path filters miss template changes.
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Commit, tag or branch to deploy, for rolling the site back. Empty deploys the latest main.
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: site-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # Same pin as validate.yml; bump both together in their own PR.
+  CLAUDE_CODE_VERSION: "2.1.296"
+  DISABLE_AUTOUPDATER: "1"
+
+jobs:
+  build:
+    name: Build and test the site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          fetch-depth: 0 # dates on the site come from git history
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Install Claude Code
+        run: npm install --global "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
+
+      - name: Test the build and search
+        run: node --test site/tests/*.test.mjs
+
+      - name: Build the site from the repository
+        shell: bash
+        run: node site/build.mjs --out _site | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the site
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    # Deploys finish in order; a newer one waits instead of cancelling one in progress.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

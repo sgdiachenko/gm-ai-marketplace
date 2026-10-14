@@ -9,16 +9,18 @@ Claude Code plugin marketplace for the team, in a public repo. One repo = one ma
 - GitHub Actions
 
 ## Commands
-- validate everything, same as CI: `scripts/validate.sh`
+- validate the marketplace, same as the Validate workflow: `scripts/validate.sh`
 - version bumps and renames vs base: `node scripts/check-pr.mjs origin/main`
 - try one plugin while editing: `claude --plugin-dir plugins/<name>`, then `/reload-plugins`
 - install from a pushed branch the way users get it, in a throwaway profile: `scripts/try-install.sh <name> [branch]`
 - roll a plugin back to an earlier release: `node scripts/rollback.mjs <name> <version>`, never `git revert`
+- catalog site, checked by the separate Site workflow: develop with `node site/dev.mjs`, test with `node --test site/tests/*.test.mjs`, build with `node site/build.mjs`
 
 ## Map
 - `.claude-plugin/marketplace.json` — the catalog, one entry per plugin
 - `plugins/<name>/` — a plugin; everything in it ships to users
 - `scripts/` — validation used locally and in CI
+- `site/` — the catalog site on GitHub Pages, built from the repository; deployed by `.github/workflows/site.yml`
 - `docs/` — maintainer and user docs
 - `specs/` — specs for planned plugins and changes
 - `INSIGHTS.md` — lessons learned
@@ -29,7 +31,7 @@ Claude Code plugin marketplace for the team, in a public repo. One repo = one ma
 - Prefer skills over commands; keep SKILL.md tool-neutral for a future Codex port
 - Hooks and MCP configs reference bundled files as `"${CLAUDE_PLUGIN_ROOT}"/...`; persistent state goes to `${CLAUDE_PLUGIN_DATA}`
 - Maintainer-only files (AGENTS.md, INSIGHTS.md, docs, specs, tests) never go inside `plugins/<name>/`; per-plugin notes go to `docs/plugins/<name>.md`
-- Repo docs and catalog metadata (catalog, `plugin.json`, skill/agent/command frontmatter, plugin READMEs) are in English; `scripts/check-marketplace.mjs` rejects Cyrillic outside code spans
+- Everything in the repository is in English: docs, catalog metadata (catalog, `plugin.json`, skill/agent/command frontmatter, plugin READMEs) and code comments; `scripts/check-marketplace.mjs` rejects Cyrillic outside code spans in docs and metadata. Ukrainian appears only as data a feature needs, such as the search words in `site/search-terms.json` and the queries that test them
 
 ## Gotchas
 - Users get a plugin change only when its `version` changes; Claude Code caches plugins by version
@@ -50,4 +52,5 @@ Claude Code plugin marketplace for the team, in a public repo. One repo = one ma
 - Read `docs/installing.md` when changing install instructions, git access or team rollout.
 - Read `docs/codex-compatibility.md` before writing skills or hooks, and before adding Codex support.
 - Read the relevant file in `specs/` before implementing a plugin or feature.
+- Read `site/README.md` before changing the catalog site or the way plugins declare components.
 - Read `INSIGHTS.md` before changing this repo; append a new entry when you learn something non-obvious.

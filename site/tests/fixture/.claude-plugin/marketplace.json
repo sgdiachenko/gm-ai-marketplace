@@ -1,0 +1,27 @@
+{
+  "name": "gm-ai-marketplace",
+  "description": "Claude Code plugins for the team",
+  "owner": { "name": "Fixture Owner" },
+  "plugins": [
+    {
+      "name": "pr-tools",
+      "source": "./plugins/pr-tools",
+      "description": "Pull request tools for the team",
+      "category": "code-review",
+      "keywords": ["github", "code review"]
+    },
+    {
+      "name": "db-helpers",
+      "source": "./plugins/db-helpers",
+      "description": "Query the staging Postgres safely and explain slow queries",
+      "category": "data",
+      "defaultEnabled": false
+    },
+    {
+      "name": "release-kit",
+      "source": "./plugins/release-kit",
+      "description": "Changelogs and version bumps from conventional commits",
+      "category": "workflow"
+    }
+  ]
+}

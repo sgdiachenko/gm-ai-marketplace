@@ -1,0 +1,24 @@
+name: Report a problem
+description: A plugin from the marketplace doesn't install or doesn't work as described.
+title: "Problem: "
+labels: [bug]
+body:
+  - type: input
+    id: plugin
+    attributes:
+      label: Plugin
+      description: The plugin name, for example pr-tools.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Shown on the plugin's page and in /plugin.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead. Include error messages.
+    validations:
+      required: true

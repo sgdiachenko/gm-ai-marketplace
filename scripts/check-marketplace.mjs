@@ -17,7 +17,7 @@ const CYRILLIC = /[\u0400-\u04FF]/;
 const CODE = /```[\s\S]*?```|`[^`\n]*`/g;
 const FRONTMATTER = /^---\n[\s\S]*?\n---/;
 const COMPONENT_DOC = /^(skills\/[^/]+\/SKILL|agents\/[^/]+|commands\/[^/]+)\.md$/;
-const ROOT_DOCS = ['.claude-plugin/marketplace.json', 'README.md', 'AGENTS.md', 'INSIGHTS.md', 'docs', 'specs'];
+const ROOT_DOCS = ['.claude-plugin/marketplace.json', 'README.md', 'AGENTS.md', 'INSIGHTS.md', 'docs', 'specs', 'site'];
 
 const errors = [];
 const fail = (message) => errors.push(message);

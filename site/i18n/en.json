@@ -1,0 +1,175 @@
+{
+  "locale": "en",
+  "meta": {
+    "homeTitle": "{site} · {description}",
+    "pageTitle": "{page} · {site}",
+    "componentTitle": "{name} · {plugin} · {site}",
+    "guideDescription": "Add the marketplace, install plugins and enable them for a project.",
+    "notFoundDescription": "This page does not exist."
+  },
+  "a11y": {
+    "skip": "Skip to content",
+    "mainNav": "Main",
+    "breadcrumb": "Breadcrumb",
+    "links": "Links",
+    "menu": "Menu"
+  },
+  "header": {
+    "search": "Search",
+    "gettingStarted": "Getting started",
+    "github": "GitHub"
+  },
+  "footer": {
+    "repository": "Repository",
+    "contributing": "Contributing",
+    "requestPlugin": "Request a plugin",
+    "built": "Built from {commit} on {date}"
+  },
+  "types": {
+    "plugin": { "label": "Plugin", "plural": "Plugins", "lower": "plugins", "count": { "one": "{n} plugin", "other": "{n} plugins" } },
+    "skill": { "label": "Skill", "plural": "Skills", "lower": "skills", "count": { "one": "{n} skill", "other": "{n} skills" } },
+    "agent": { "label": "Agent", "plural": "Agents", "lower": "agents", "count": { "one": "{n} agent", "other": "{n} agents" } },
+    "command": { "label": "Command", "plural": "Commands", "lower": "commands", "count": { "one": "{n} command", "other": "{n} commands" } },
+    "hook": { "label": "Hook", "plural": "Hooks", "lower": "hooks", "count": { "one": "{n} hook", "other": "{n} hooks" } },
+    "mcp-server": { "label": "MCP server", "plural": "MCP servers", "lower": "MCP servers", "count": { "one": "{n} MCP server", "other": "{n} MCP servers" } },
+    "lsp-server": { "label": "LSP server", "plural": "LSP servers", "lower": "LSP servers", "count": { "one": "{n} LSP server", "other": "{n} LSP servers" } },
+    "guide": { "label": "Guide", "plural": "Guides", "lower": "guides", "count": { "one": "{n} guide", "other": "{n} guides" } }
+  },
+  "badges": {
+    "needsSetup": "Needs setup",
+    "offByDefault": "Off by default",
+    "offByDefaultHint": "Installed plugins start disabled; enable it in /plugin or settings.json"
+  },
+  "card": {
+    "pluginContext": "v{version} · {category}",
+    "pluginVersion": "v{version}",
+    "componentContext": "in {plugin} · v{version}",
+    "copyInstall": "Copy install",
+    "installCopied": "Install command for {plugin} copied"
+  },
+  "copy": {
+    "copy": "Copy",
+    "copied": "Copied",
+    "failed": "Copy failed",
+    "copyValue": "Copy {value}",
+    "valueCopied": "{value} copied",
+    "done": "Copied to clipboard",
+    "failedMessage": "Could not copy. Select the text and copy it by hand."
+  },
+  "search": {
+    "label": "Search plugins, skills, agents and more",
+    "placeholder": "Describe a task, e.g. “review a pull request”",
+    "clear": "Clear search",
+    "indexError": "Search couldn't load, so it's off for now. The plugin list below still works.",
+    "retry": "Retry",
+    "retrying": "Retrying…",
+    "typeGroup": "Type",
+    "all": "All",
+    "category": "Category",
+    "anyCategory": "Any",
+    "showing": "Showing {types}",
+    "showAllTypes": "Show all types",
+    "allPlugins": "All plugins",
+    "recentFirst": "{n} · recently updated first",
+    "inMarketplace": "{n} in the marketplace",
+    "searching": "Searching…",
+    "results": { "one": "{n} result", "other": "{n} results" },
+    "filters": "Filters",
+    "closeFilters": "Close filters",
+    "reset": "Reset",
+    "showPlugins": { "one": "Show {n} plugin", "other": "Show {n} plugins" },
+    "showResults": { "one": "Show {n} result", "other": "Show {n} results" },
+    "noneYet": "No {types} in the marketplace yet.",
+    "noneInCategory": "No {types} in this category yet.",
+    "nothingFound": "Nothing found for “{query}”",
+    "nothingWithFilters": "Nothing matches these words with the current filters. Clear them, or ask for a plugin that does this.",
+    "nothingAtAll": "No plugin, skill, agent or command matches these words yet. If you need one, ask for it.",
+    "clearFilters": "Clear filters",
+    "requestPlugin": "Request a plugin for this",
+    "tip": "Search works best with English words. Try"
+  },
+  "install": {
+    "heading": "Install",
+    "headingFor": "Install {plugin}",
+    "method": "Install method",
+    "terminal": "Terminal",
+    "terminalNote": "Run in any terminal.",
+    "claude": "In Claude Code",
+    "claudeNote": "Type in a Claude Code session.",
+    "project": "For a project",
+    "projectNote": "Add to .claude/settings.json in the project root, so the whole team gets it.",
+    "commandCopied": "Install command copied",
+    "snippetCopied": "settings.json snippet copied",
+    "requires": "Needs Claude Code {version} or later.",
+    "trouble": "Trouble installing?",
+    "troubleLink": "Getting started"
+  },
+  "plugin": {
+    "kicker": "Plugin",
+    "back": "All plugins",
+    "backToSearch": "Search results",
+    "updated": "Updated {date}",
+    "setup": "Setup",
+    "setupLead": "Claude Code asks for these when you enable the plugin.",
+    "keychain": "Stored in the system keychain",
+    "contents": "Contents",
+    "readme": "README",
+    "viewSource": "View source",
+    "reportProblem": "Report a problem"
+  },
+  "component": {
+    "inPlugin": "in {plugin}",
+    "instructions": "Instructions",
+    "instructionsMeta": "What Claude is told when it runs",
+    "more": "More from {plugin}",
+    "yes": "Yes",
+    "no": "No",
+    "facts": {
+      "userInvocable": "Users can invoke it",
+      "modelInvocable": "Claude invokes it on its own",
+      "allowedTools": "Allowed tools",
+      "model": "Model",
+      "tools": "Tools",
+      "argumentHint": "Argument hint"
+    }
+  },
+  "guide": {
+    "kicker": "Getting started",
+    "title": "Getting started",
+    "onThisPage": "On this page"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "lead": "This page doesn't exist, or it moved. Search the marketplace instead.",
+    "home": "Go to the home page"
+  },
+  "generated": {
+    "hookSentence": "{actions} {when}.",
+    "hookRuns": "runs {command}",
+    "hookUrl": "calls a URL",
+    "hookPrompt": "asks Claude to check",
+    "hookOther": "runs a hook",
+    "hookTool": "a tool matching {matcher}",
+    "hookAnyTool": "any tool",
+    "hookWhen": {
+      "PreToolUse": "before Claude uses {tool}",
+      "PostToolUse": "after Claude uses {tool}",
+      "PostToolUseFailure": "after {tool} fails",
+      "PermissionRequest": "when Claude asks permission for {tool}",
+      "UserPromptSubmit": "when you submit a prompt",
+      "Stop": "when Claude finishes responding",
+      "SubagentStart": "when a subagent starts",
+      "SubagentStop": "when a subagent finishes",
+      "SessionStart": "when a session starts",
+      "SessionEnd": "when a session ends",
+      "Notification": "when Claude Code sends a notification",
+      "PreCompact": "before the conversation is compacted",
+      "other": "on the {event} event"
+    },
+    "mcpLocal": "Local MCP server; runs {command}.",
+    "mcpRemote": "Remote MCP server at {host}.",
+    "mcpRemoteNoHost": "Remote MCP server.",
+    "lspFor": "Language server for {extensions} files.",
+    "lsp": "Language server."
+  }
+}

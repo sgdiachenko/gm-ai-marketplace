@@ -1,0 +1,22 @@
+name: Request a plugin
+description: Ask for a plugin, skill or agent the marketplace doesn't have yet.
+title: "Plugin request: "
+labels: [plugin-request]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: What do you need?
+      description: The task you want Claude Code to help with. The catalog site fills this in with your search.
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: An example task
+      description: A request you would type into Claude Code, and what a good result looks like.
+  - type: input
+    id: who
+    attributes:
+      label: Who would use it
+      description: You, your team, everyone?

@@ -1,0 +1,20 @@
+{
+  "name": "pr-tools",
+  "displayName": "PR Tools",
+  "version": "0.3.1",
+  "description": "Pull request tools",
+  "author": { "name": "Platform team" },
+  "userConfig": {
+    "github_token": {
+      "type": "string",
+      "title": "GitHub token",
+      "description": "Personal access token used to read pull requests and post review summaries",
+      "sensitive": true
+    },
+    "review_language": {
+      "type": "string",
+      "title": "Review language",
+      "description": "Language for posted summaries"
+    }
+  }
+}
