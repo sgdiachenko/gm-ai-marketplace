@@ -1,6 +1,6 @@
 {
-  "name": "gm-ai-marketplace",
-  "description": "Claude Code plugins for the team",
+  "name": "gm-ai-marketplace-stable",
+  "description": "Claude Code plugins for the team — stable channel: releases promoted after verification",
   "owner": {
     "name": "Serhii Diachenko"
   },
