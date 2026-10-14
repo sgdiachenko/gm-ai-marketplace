@@ -1,0 +1,4 @@
+{
+  "_comment": "USD per 1M tokens, matched by substring of the model id (first match wins). Ships empty on purpose: rates change, and a wrong rate is worse than none. Put your own card in the plugin's data directory as prices.json with the same shape; /workflow-retro passes it with --prices. Example row: { \"match\": \"sonnet\", \"input\": 0, \"cache_write\": 0, \"cache_read\": 0, \"output\": 0 }",
+  "rates": []
+}

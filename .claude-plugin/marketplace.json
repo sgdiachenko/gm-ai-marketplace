@@ -10,6 +10,42 @@
       "source": "./plugins/example",
       "description": "Template plugin: copy it to start a new one",
       "category": "templates"
+    },
+    {
+      "name": "engineering-paved-path",
+      "source": "./plugins/engineering-paved-path",
+      "description": "Shared engineering skills: React, Next.js, Fastify, frontend and backend architecture, React testing, security, INSIGHTS.md",
+      "category": "engineering",
+      "author": {
+        "name": "Serhii Diachenko"
+      }
+    },
+    {
+      "name": "research-tools",
+      "source": "./plugins/research-tools",
+      "description": "Read-only researcher agent: answers a concrete question with evidence from the repo or external sources",
+      "category": "engineering",
+      "author": {
+        "name": "Serhii Diachenko"
+      }
+    },
+    {
+      "name": "architecture-review",
+      "source": "./plugins/architecture-review",
+      "description": "Read-only architecture-reviewer agent: dependency direction, layering and module boundaries in a diff",
+      "category": "engineering",
+      "author": {
+        "name": "Serhii Diachenko"
+      }
+    },
+    {
+      "name": "sdd-engineering",
+      "source": "./plugins/sdd-engineering",
+      "description": "Spec-Driven Development: spec, plan, parallel implementation, verification against the spec, review and a retro of the run",
+      "category": "engineering",
+      "author": {
+        "name": "Serhii Diachenko"
+      }
     }
   ]
 }

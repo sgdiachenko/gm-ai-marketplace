@@ -16,6 +16,10 @@ No GitHub SSH key? Set `CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1` first. Setup, updates
 
 | Plugin | What it does |
 |---|---|
+| [sdd-engineering](plugins/sdd-engineering) | Spec-Driven Development: spec, plan, parallel implementation, verification against the spec, architecture and code review, a retro of the run. Installs the three plugins below |
+| [engineering-paved-path](plugins/engineering-paved-path) | Shared engineering skills: React, Next.js, Fastify, frontend and backend architecture, React testing, security, `INSIGHTS.md` |
+| [research-tools](plugins/research-tools) | Read-only `researcher` agent: answers a concrete question with evidence from the repo or external sources |
+| [architecture-review](plugins/architecture-review) | Read-only `architecture-reviewer` agent: dependency direction, layering and module boundaries in a diff |
 | [example](plugins/example) | Template plugin. Copy it to start a new one; remove it once real plugins exist |
 
 ## Contributing
@@ -30,7 +34,8 @@ No GitHub SSH key? Set `CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1` first. Setup, updates
 ```
 .claude-plugin/marketplace.json   catalog: one entry per plugin
 plugins/<name>/                   a plugin; everything here ships to users
-scripts/                          validation used locally and in CI
+scripts/                          validation, release tagging and eval runs
+evals/                            behaviour tests run with claude plugin eval; never shipped
 docs/                             maintainer and user docs
 specs/                            specs for planned plugins and changes
 INSIGHTS.md                       lessons learned
