@@ -179,7 +179,7 @@ The main session orchestrates: subagents can't ask the user questions, so each r
 
 ## Evals
 
-- **Format.** The built-in `claude plugin eval`. Cases live at the repository root in `evals/<suite>/<case>/`, outside `plugins/`, and name the plugins they load with `plugins:`.
+- **Format.** The built-in `claude plugin eval`. Cases live at the repository root in `evals/<suite>/<case>/`, outside `plugins/`, name the plugins they load with `plugins:`, and carry their suite as a tag. Suites run with the repository root as the target (`claude plugin eval . --tag <suite>`): the command loads `plugins:` entries only from under the directory it runs against.
 - **Suites:**
   - `namespaces`: free `tool_used` graders confirm that `engineering-paved-path:<skill>`, `research-tools:researcher`, `architecture-review:architecture-reviewer` and the `sdd-engineering` agents are reachable by their namespaced names;
   - `architecture-review`: the three dev-digest fixtures, generalized: a clean refactor with no findings, a layer violation, a core-boundary violation;
@@ -206,6 +206,6 @@ The repository is public.
 ## Risks and open questions
 
 - Whether an agent's `skills:` list preloads a namespaced skill from a dependency plugin is not documented. If it doesn't, agents load those skills through the Skill tool instead.
-- Whether `claude plugin eval` runs cases that live outside the plugin directory is not documented. If it doesn't, the cases move into the plugin's own `evals/` and the maintainer-only rule gets an exception.
+- Resolved: `claude plugin eval` runs cases outside a plugin directory when the target is a directory that contains both the cases and the plugins (the repository root). A case file as the target fails: its `plugins:` entries resolve outside the case directory, the containment root.
 - `claude plugin eval` may be in early access for some accounts.
 - `react-best-practices`, `react-testing-library`, `security` and `mermaid-diagram` have no public upstream that a code search on 2026-10-14 could find. They are treated as the author's own.

@@ -52,3 +52,14 @@ Entry template:
 - **Context:** porting dev-digest's evals to the built-in `claude plugin eval`.
 - **Insight:** the command publishes its HTML report to claude.ai unless given `--no-publish`, and its default baseline arm runs without the plugin, where namespaced agents don't exist and every dispatch fails.
 - **Action:** `scripts/run-evals.sh` always passes `--no-publish` and `--ablation none`.
+
+## 2026-10-14 — claude plugin eval loads plugins only from under its target
+- **Context:** first run of the `namespaces` suite, with each case file as the target.
+- **Insight:** a case's `plugins:` entries must resolve inside the containment root: the enclosing plugin, or else the directory given as the target. With a case file as the target, the root is the case directory, so `../../../plugins/<name>` fails to load ("outside the containment root") before any model call.
+- **Action:** `scripts/run-evals.sh` runs `claude plugin eval .` from the repository root and selects a suite with `--tag <suite>`; every case carries its suite as a tag.
+
+## 2026-10-14 — Judge graders need the agent's own words and a stronger judge
+- **Context:** the `architecture-review` eval suite; the reviewer found both planted violations in every run, but the case scored 0.44.
+- **Insight:** an `llm` grader judges the main session's final reply. Asked only to "show the review", the main session paraphrased it into a table, dropping the verbatim quotes the rubric required and adding its own corrections. One all-or-nothing rubric turned a single strict clause into a failed case, and the default Haiku judge failed on-topic findings that the rubric explicitly allowed.
+- **Action:** prompts ask for the agent's output "exactly as returned"; one grader per criterion; rubrics name what fails rather than what passes; `scripts/run-evals.sh` passes `--judge-model sonnet`.
+

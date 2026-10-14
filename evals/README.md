@@ -1,6 +1,6 @@
 # Evals
 
-Behaviour tests for the SDD plugins, in the format of Claude Code's built-in [`claude plugin eval`](https://code.claude.com/docs/en/plugin-evals). Maintainer-only: this directory sits outside `plugins/`, so it never ships to users. Each case names the plugins it loads with `plugins:` in its `prompt.md`.
+Behaviour tests for the SDD plugins, in the format of Claude Code's built-in [`claude plugin eval`](https://code.claude.com/docs/en/plugin-evals). Maintainer-only: this directory sits outside `plugins/`, so it never ships to users. Each case names the plugins it loads with `plugins:` in its `prompt.md` and carries its suite name as a tag.
 
 ## Suites
 
@@ -15,24 +15,25 @@ The `architecture-review` fixtures are the dev-digest fixtures moved onto the re
 ## Run
 
 ```bash
-scripts/run-evals.sh namespaces              # per-case cost ceiling defaults to $2
+scripts/run-evals.sh namespaces              # cost ceiling for the suite defaults to $5
 scripts/run-evals.sh sdd-engineering
-scripts/run-evals.sh architecture-review 5
+scripts/run-evals.sh architecture-review 10
 ```
 
-The script runs each case with:
+The script runs `claude plugin eval .` from the repository root with `--tag <suite>`. The root has to be the target: the command loads a case's `plugins:` only from under the directory it runs against, so a case file as the target can't reach `plugins/`. It also passes:
 
 - `--ablation none` — without the plugins, the namespaced agents don't exist, so a baseline arm would only fail;
 - `--no-publish` — `claude plugin eval` otherwise publishes the HTML report to claude.ai;
+- `--judge-model sonnet` — with the default Haiku judge, `llm` graders failed reviews that met their rubric;
 - `--trust-plugin` and `--max-cost-usd`.
 
-Reports go to `evals/results/<timestamp>/<suite>/<case>/`, which git ignores.
+Reports go to `evals/results/<timestamp>/<suite>/`, which git ignores. To run one case: add `--case <name>` to the same command.
 
 Runs use your Claude credentials and count against your plan or API bill. CI doesn't run them: it has no model credentials. Run the suites by hand before releasing a change to these plugins, and note the result in the PR.
 
 ## Add a case
 
-Copy a case directory in the suite and edit `prompt.md` and `graders/`. Prefer free graders (`tool_used`, `regex`, `file_exists`) for anything that can be checked without a judge. To check that an agent was used:
+Copy a case directory in the suite and edit `prompt.md` and `graders/`; keep the suite name in `tags:`. Prefer free graders (`tool_used`, `regex`, `file_exists`) for anything that can be checked without a judge. To check that an agent was used:
 
 ```markdown
 ---
