@@ -89,4 +89,29 @@ There is no "deprecated" state. To retire a plugin:
 
 ## Release channels
 
-Not set up. One catalog serves one version of each plugin. If a beta track is needed, publish a second catalog with a different marketplace `name` (for example `gm-ai-marketplace-beta`) whose entries point at another ref, and give the two refs different versions.
+One catalog serves one version of each plugin, so a channel is a second catalog. Both live in this repository:
+
+| Channel | Users add | Catalog `name` | Serves |
+|---|---|---|---|
+| latest | `sgdiachenko/gm-ai-marketplace` | `gm-ai-marketplace` | `main`: every merged release |
+| stable | `sgdiachenko/gm-ai-marketplace#stable` | `gm-ai-marketplace-stable` | the `stable` branch: releases promoted after they were verified |
+
+The `stable` branch is `main` at a verified commit plus one commit that renames the catalog. Claude Code identifies a marketplace by its `name`, so a user can register both, and the install ids differ: `sdd-engineering@gm-ai-marketplace` and `sdd-engineering@gm-ai-marketplace-stable`. Plugins keep their relative-path sources, so a project that enables a stable plugin in `.claude/settings.json` gets it fetched like a latest one.
+
+### Promote a release to stable
+
+Promote a `main` commit only after its release tags exist and its evals passed:
+
+```bash
+git fetch origin
+git switch -c promote-<plugin>-<version> origin/stable
+git merge --no-ff <main commit>     # keep "name": "gm-ai-marketplace-stable" if the catalog conflicts
+git push -u origin promote-<plugin>-<version>
+```
+
+Open the pull request against `stable`; CI validates it, and `check-pr.mjs` compares versions against `origin/stable`. Users on the stable channel get the promoted versions on their next auto-update or `/plugin marketplace update gm-ai-marketplace-stable`. Never merge `stable` into `main`: the catalog name would follow.
+
+### What a channel doesn't pin
+
+- **Dependencies.** A range such as `^1.0.0` resolves against the `<plugin>--v<version>` tags of the whole repository, not of the channel's branch. A stable plugin therefore picks up the newest dependency tag in its range as soon as that tag exists on `main`, promoted or not. A dependency change that stable users must not get yet needs a new major version, outside the range.
+- **Plugin data.** `${CLAUDE_PLUGIN_DATA}` is `~/.claude/plugins/data/<plugin>-<marketplace>/`, so each channel has its own directory. Moving between channels doesn't carry state such as the `workflow-retro` rate card (`prices.json`); copy it.
