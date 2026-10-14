@@ -19,6 +19,15 @@
       "author": {
         "name": "Serhii Diachenko"
       }
+    },
+    {
+      "name": "research-tools",
+      "source": "./plugins/research-tools",
+      "description": "Read-only researcher agent: answers a concrete question with evidence from the repo or external sources",
+      "category": "engineering",
+      "author": {
+        "name": "Serhii Diachenko"
+      }
     }
   ]
 }

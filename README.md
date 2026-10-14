@@ -17,6 +17,7 @@ No GitHub SSH key? Set `CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1` first. Setup, updates
 | Plugin | What it does |
 |---|---|
 | [engineering-paved-path](plugins/engineering-paved-path) | Shared engineering skills: React, Next.js, Fastify, frontend and backend architecture, React testing, security, `INSIGHTS.md` |
+| [research-tools](plugins/research-tools) | Read-only `researcher` agent: answers a concrete question with evidence from the repo or external sources |
 | [example](plugins/example) | Template plugin. Copy it to start a new one; remove it once real plugins exist |
 
 ## Contributing
