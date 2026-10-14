@@ -33,7 +33,7 @@ Claude Code plugin marketplace for the team, in a public repo. One repo = one ma
 - Prefer skills over commands; keep SKILL.md tool-neutral for a future Codex port
 - Hooks and MCP configs reference bundled files as `"${CLAUDE_PLUGIN_ROOT}"/...`; persistent state goes to `${CLAUDE_PLUGIN_DATA}`
 - Maintainer-only files (AGENTS.md, INSIGHTS.md, docs, specs, tests) never go inside `plugins/<name>/`; per-plugin notes go to `docs/plugins/<name>.md`
-- Repo docs and catalog metadata (catalog, `plugin.json`, skill/agent/command frontmatter, plugin READMEs) are in English; `scripts/check-marketplace.mjs` rejects Cyrillic outside code spans
+- Everything in the repository is in English: docs, catalog metadata, plugin files (code, examples and comments included), scripts and evals. `scripts/check-marketplace.mjs` rejects Cyrillic anywhere in `plugins/`, `scripts/`, `evals/` and `.github/`, and outside code spans in the root docs, `docs/` and `specs/`
 
 ## Gotchas
 - Users get a plugin change only when its `version` changes; Claude Code caches plugins by version

@@ -117,7 +117,7 @@ function errorResults(lines) {
   return out;
 }
 
-const GAP_HEAD = /(not found|не знайдено|прогалин|gaps?\b|not analy[sz]ed|не аналізува|open questions|відкриті питання|caveats?|застереження|конфлікти)/i;
+const GAP_HEAD = /(not found|gaps?\b|not analy[sz]ed|open questions|caveats?|conflicts)/i;
 /** Sections of a handback the agent itself flagged as gaps / open items. */
 function selfReportedGaps(msgs) {
   const out = [];

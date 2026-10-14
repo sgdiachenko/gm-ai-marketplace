@@ -16,12 +16,13 @@ const PLUGIN_ROOT_REF = /\$\{CLAUDE_PLUGIN_ROOT\}(?:\\?")?\/([\w./-]+)/g;
 const SKILL_DIR_REF = /\$\{CLAUDE_SKILL_DIR\}(?:\\?")?\/([\w./-]+)/g;
 // Plugins are shared across projects: no plugin may point at one project's files or at its own source layout.
 const FORBIDDEN_REF = /dev-?digest|\.claude\/(?:skills|agents)\//i;
-// Catalog metadata and docs are in English. Skill bodies, plugin code and quoted examples in `code` may use any language.
+// The repository is in English. Plugins, scripts, evals and workflows have no Cyrillic at all, code and
+// examples included; root docs may quote a non-English term only inside `code`.
 const CYRILLIC = /[\u0400-\u04FF]/;
 const CODE = /```[\s\S]*?```|`[^`\n]*`/g;
 const FRONTMATTER = /^---\n[\s\S]*?\n---/;
-const COMPONENT_DOC = /^(skills\/[^/]+\/SKILL|agents\/[^/]+|commands\/[^/]+)\.md$/;
 const ROOT_DOCS = ['.claude-plugin/marketplace.json', 'README.md', 'AGENTS.md', 'INSIGHTS.md', 'docs', 'specs'];
+const STRICT_ENGLISH = ['scripts', 'evals', '.github'];
 
 const errors = [];
 const plugins = new Map(); // name -> { dir, manifest, components }
@@ -48,6 +49,11 @@ function walk(dir) {
     const path = join(dir, entry.name);
     return entry.isDirectory() ? walk(path) : [path];
   });
+}
+
+function checkNoCyrillic(path, text = readFileSync(path, 'utf8')) {
+  const line = text.split('\n').findIndex((l) => CYRILLIC.test(l));
+  if (line !== -1) fail(`${rel(path)}:${line + 1}: Cyrillic text; everything in plugins, scripts, evals and workflows is in English, code and examples included`);
 }
 
 function checkEnglish(path, text = readFileSync(path, 'utf8')) {
@@ -179,12 +185,10 @@ function checkFile(file, pluginDir) {
   if (hasShebang(file) && (stat.mode & 0o111) === 0) fail(`${rel(file)}: has a shebang but is not executable (chmod +x)`);
 
   const path = relative(pluginDir, file).split(sep).join('/');
-  if (path === '.claude-plugin/plugin.json' || path === 'README.md' || path === 'CHANGELOG.md') checkEnglish(file);
-  else if (COMPONENT_DOC.test(path)) checkEnglish(file, FRONTMATTER.exec(readFileSync(file, 'utf8'))?.[0] ?? '');
-
   if (!TEXT_EXTENSIONS.has(extname(file))) return;
 
   const text = readFileSync(file, 'utf8');
+  checkNoCyrillic(file, text);
   for (const match of text.matchAll(PLUGIN_ROOT_REF)) {
     const target = match[1].replace(/\.+$/, '');
     const path = resolve(pluginDir, target);
@@ -319,6 +323,12 @@ if (marketplace) {
       if (entry.isDirectory() && !listed.has(entry.name)) fail(`plugins/${entry.name}: not listed in .claude-plugin/marketplace.json`);
     }
   }
+}
+
+for (const name of STRICT_ENGLISH) {
+  const path = join(root, name);
+  if (!existsSync(path)) continue;
+  for (const file of walk(path).filter((f) => TEXT_EXTENSIONS.has(extname(f)) && !f.includes(`${sep}results${sep}`))) checkNoCyrillic(file);
 }
 
 for (const name of ROOT_DOCS) {

@@ -20,9 +20,9 @@ noted in it; a missing check command is never guessed — the agents ask instead
 ## Language
 
 - Docs language: English
-- EARS keywords: English (WHEN / WHILE / IF … THEN / WHERE)
+- EARS keywords: WHEN / WHILE / IF … THEN / WHERE
 
-<!-- For Ukrainian keywords write: EARS keywords: Ukrainian (КОЛИ / ПОКИ / ЯКЩО … ТОДІ / ДЕ) -->
+<!-- To write specs in another language, set the docs language and list the four keywords translated into it, in the same order. -->
 
 ## Modules
 

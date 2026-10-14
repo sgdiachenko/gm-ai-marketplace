@@ -31,8 +31,8 @@ or the path a `Profile:` line in your prompt gives. You use:
 - *Paths* → `<specs>` (default `docs/specs/`); the spec registry is
   `<specs>/README.md`.
 - *Language* → the language you write the spec in (default English) and the
-  EARS keyword style (default English: `WHEN` / `WHILE` / `IF … THEN` /
-  `WHERE`; or Ukrainian: `КОЛИ` / `ПОКИ` / `ЯКЩО … ТОДІ` / `ДЕ`).
+  EARS keywords (default `WHEN` / `WHILE` / `IF … THEN` / `WHERE`, or the
+  translated keywords the profile lists).
 - *Modules* → the module names you list under *Modules* and *Affected
   modules*.
 
@@ -306,8 +306,8 @@ line):
 - **Acceptance criteria (EARS)** — one requirement per line in the
   `ears-requirements` format:
   `AC-n [pattern, US-n, priority, verify: unit|integration|e2e|manual] <EARS sentence>`
-  with the profile's EARS keywords (English by default: WHEN / WHILE /
-  IF … THEN / WHERE) and **shall**.
+  with the EARS keywords (WHEN / WHILE / IF … THEN / WHERE, or the
+  translations the profile lists) and **shall**.
   Unwanted-behaviour ACs cover every failure found in `analyze`.
 - **Edge cases** — `EC-n: <situation> → <required behaviour> (→ AC-n)`.
   For a feature with UI, start with the **UI state matrix** (screen ×

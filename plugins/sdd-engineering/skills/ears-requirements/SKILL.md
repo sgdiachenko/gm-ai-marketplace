@@ -11,16 +11,9 @@ EARS (Easy Approach to Requirements Syntax) was introduced by Mavin, Wilkinson, 
 
 ## Keywords
 
-**shall** marks a mandatory requirement. The trigger keywords come from the project profile's *Language* section (`docs/sdd-profile.md`):
+**shall** marks a mandatory requirement. The trigger keywords are `WHEN` (event-driven), `WHILE` (state-driven), `IF … THEN` (unwanted behaviour) and `WHERE` (optional feature).
 
-| Pattern | English (default) | Ukrainian |
-|---|---|---|
-| Event-driven | `WHEN` | `КОЛИ` |
-| State-driven | `WHILE` | `ПОКИ` |
-| Unwanted behaviour | `IF … THEN` | `ЯКЩО … ТОДІ` |
-| Optional feature | `WHERE` | `ДЕ` |
-
-Use one style per spec. The examples below use English keywords.
+A project that writes its specs in another language may list translated keywords in the *Language* section of its profile (`docs/sdd-profile.md`). Use them in the same positions, and use one set of keywords per spec. The examples below use the English keywords.
 
 ## The five patterns
 
@@ -111,7 +104,7 @@ The spec ends its requirement part with a matrix so a planner and a verifier can
 ## Reading a spec as a verifier
 
 - Evidence for an AC is behaviour: a test asserting trigger → response (`path:line`), matching its `verify:` kind. Code without a test is `partial`; a "done" claim is not evidence.
-- For unwanted-behaviour ACs (`IF … THEN` / `ЯКЩО … ТОДІ`) the evidence must exercise the failure branch.
+- For unwanted-behaviour ACs (`IF … THEN`, or its translation from the profile) the evidence must exercise the failure branch.
 - `verify: manual` rows are `not-verifiable` for a static checker — say what a human must look at.
 
 ## Sources

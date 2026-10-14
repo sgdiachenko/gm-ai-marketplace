@@ -8,7 +8,7 @@ Ported from `sgdiachenko/dev-digest` at `1b694bc41a61`.
 
 | Component | Source | Main changes |
 |---|---|---|
-| `agents/spec-creator.md` | `.claude/agents/spec-creator.md` | paths, modules and language from the project profile; EARS keywords from the profile (English by default); preloads namespaced skills; contract-change reasoning inlined instead of reading three dev-digest skills; never sets `implemented` (run-plan does) |
+| `agents/spec-creator.md` | `.claude/agents/spec-creator.md` | paths, modules and language from the project profile; EARS keywords in English, or translations listed in the profile; preloads namespaced skills; contract-change reasoning inlined instead of reading three dev-digest skills; never sets `implemented` (run-plan does) |
 | `agents/implementation-planner.md` | `.claude/agents/implementation-planner.md` | preloads one skill instead of 16 (~40k tokens); skills per file from the profile's *Skill lanes* or by file type, loaded through the Skill tool; checks from the profile; unknown project facts become `Q#`; `doc-writer` / `test-writer` hand-offs removed |
 | `agents/implementer.md` | `.claude/agents/implementer.md` | step skills loaded through the Skill tool by namespaced name; checks and guardrails from the profile; dev-digest's lane table, commands, migration and contract-sync rules generalized |
 | `agents/plan-verifier.md` | `.claude/agents/plan-verifier.md` | `gate.sh fingerprint` replaced by the bundled `skills/run-plan/scripts/fingerprint.sh`; skill sources loaded through the Skill tool; checks from the profile |
@@ -16,7 +16,7 @@ Ported from `sgdiachenko/dev-digest` at `1b694bc41a61`.
 | `skills/run-plan/profile-template.md` | new | the profile template |
 | `skills/run-plan/scripts/fingerprint.sh` | new | working-tree fingerprint (HEAD + staged, unstaged, untracked changes), with `--exclude` for the plans directory |
 | `skills/workflow-retro/` | `.claude/skills/workflow-retro/` | script called through `${CLAUDE_SKILL_DIR}`; transcripts found through `CLAUDE_CONFIG_DIR`; rate card read from `${CLAUDE_PLUGIN_DATA}/prices.json` (`--prices`), bundled card empty; report language from the profile |
-| `skills/ears-requirements/` | `.claude/skills/ears-requirements/SKILL.md` | English keywords by default with a Ukrainian option; examples rewritten without dev-digest's domain |
+| `skills/ears-requirements/` | `.claude/skills/ears-requirements/SKILL.md` | English keywords, with translations from the profile as an option; examples rewritten without dev-digest's domain |
 | `skills/ux-design-review/` | `.claude/skills/ux-design-review/SKILL.md` | dev-digest states (`~/.devdigest`, GitHub token, LLM review runs) generalized |
 | `skills/mermaid-diagram/` | `.claude/skills/mermaid-diagram/` | reference to a missing `references.md` replaced by the Mermaid docs link |
 

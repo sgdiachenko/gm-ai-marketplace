@@ -84,7 +84,7 @@ The agents don't know your project's paths, commands or rules until you tell the
 | Section | What it holds | Default |
 |---|---|---|
 | Paths | specs, plans, retros, design images | `docs/specs/`, `docs/plans/`, `docs/retros/`, `docs/design/` |
-| Language | docs language; EARS keywords | English; English (`WHEN` / `WHILE` / `IF … THEN` / `WHERE`), or Ukrainian (`КОЛИ` / `ПОКИ` / `ЯКЩО … ТОДІ` / `ДЕ`) |
+| Language | docs language; EARS keywords | English; `WHEN` / `WHILE` / `IF … THEN` / `WHERE`, or translated keywords listed in the profile |
 | Modules | each module's path, package manager, full checks (what CI runs) and targeted test command | none — agents ask rather than guess |
 | Skill lanes | file globs → namespaced skills implementers must load | the `engineering-paved-path` skill matching the file type |
 | Architecture rules | rule sources (docs, linter configs), architecture checks, known-violation baseline | the paved-path architecture skills |

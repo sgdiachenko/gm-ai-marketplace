@@ -78,3 +78,5 @@ Claude Code finds these locations without any manifest field. Component folders 
 
 **Evals.** Behaviour tests in the `claude plugin eval` format live in `evals/<suite>/` at the repository root, never inside a plugin. See `evals/README.md`.
 
+**English only.** Everything in a plugin is in English: skill and agent bodies, examples, comments, scripts and user-facing text. A plugin may tell agents to write into a user's project in another language, but its own files stay English. `scripts/check-marketplace.mjs` rejects any Cyrillic in `plugins/`.
+

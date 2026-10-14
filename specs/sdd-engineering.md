@@ -92,7 +92,7 @@ Every ported agent, skill and supporting file follows these rules.
 5. **User state in `${CLAUDE_PLUGIN_DATA}`.** The retro's rate card is read from `${CLAUDE_PLUGIN_DATA}/prices.json` first, then from the bundled, empty `assets/prices.json`.
 6. **`permissionMode` is ignored in plugin agents.** Read-only agents are read-only through `tools` and `disallowedTools`. The implementer no longer runs in `acceptEdits`; the README tells users to approve edits or start the session in that mode.
 7. **Short descriptions.** Each skill and agent `description` stays under about 350 characters, since it loads into every session. Frontmatter is English.
-8. **Language.** Agent and skill bodies are English. What agents write (specs, plans, retros) follows the profile's docs language, English by default. EARS keywords default to English (`WHEN`, `WHILE`, `IF … THEN`, `WHERE`, with `shall`); the profile can switch them to Ukrainian (`КОЛИ`, `ПОКИ`, `ЯКЩО … ТОДІ`, `ДЕ`).
+8. **Language.** Everything in the plugins is English: agent and skill bodies, examples, comments and scripts. What agents write into a user's project (specs, plans, retros) follows the profile's docs language, English by default. EARS keywords are `WHEN`, `WHILE`, `IF … THEN` and `WHERE`, with `shall`; a profile may list translated keywords for specs written in another language.
 
 ## Project profile
 
@@ -101,7 +101,7 @@ The explicit inputs that replace dev-digest paths. A Markdown file in the user's
 | Section | Holds | Default when missing |
 |---|---|---|
 | Paths | specs, plans, retros, design images | `docs/specs/`, `docs/plans/`, `docs/retros/`, `docs/design/` |
-| Language | docs language, EARS keyword style | English, English |
+| Language | docs language, EARS keywords | English; `WHEN` / `WHILE` / `IF … THEN` / `WHERE` |
 | Modules | name, path, full check commands, targeted test command | none: agents ask instead of guessing |
 | Skill lanes | file glob → namespaced skills | none: agents use the paved-path skills that match the file type |
 | Architecture rules | rule sources (skills, config files, ADRs), mechanical check commands | `engineering-paved-path:onion-architecture` and `:frontend-architecture` |
