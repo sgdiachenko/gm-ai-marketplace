@@ -49,9 +49,10 @@ set -- --scaffold "$@"
 
 stamp="$(date +%Y%m%d-%H%M%S)"
 out="evals/results/$stamp/$suite"
-# The commit the plugins came from, "-dirty" when the working tree had changes; compare-evals.mjs
+# The commit the plugins came from, "-dirty" when tracked files had changes; compare-evals.mjs
 # prints it next to the results.
-commit="$(git describe --always --dirty --abbrev=12 2>/dev/null || echo unknown)"
+commit="$(git rev-parse --short=12 HEAD 2>/dev/null || echo unknown)"
+if [ -n "$(git status --porcelain --untracked-files=no 2>/dev/null)" ]; then commit="$commit-dirty"; fi
 # The target is the repository root: `claude plugin eval` loads a case's `plugins:` only from under
 # the directory it runs against, and plugins/ is outside every case directory. Each case carries
 # its suite name as a tag. No baseline arm: without the plugins, the namespaced agents don't exist

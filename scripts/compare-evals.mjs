@@ -6,6 +6,8 @@
 // still works after the temporary directories are gone.
 // Usage: node scripts/compare-evals.mjs <baseline-dir> <candidate-dir>
 //        node scripts/compare-evals.mjs <results-dir>            (summary of one run, no gate)
+// A side may list several results directories separated by commas, when its runs were made in more
+// than one invocation: node scripts/compare-evals.mjs base-a,base-b cand
 // Gate, all required: candidate pass rate ≥ baseline; no partial run or skipped paid grader; no
 // grader that passed in every baseline run fails in a candidate run; and the candidate's median
 // cost or median latency is below the baseline's lowest run, so the saving is outside the
@@ -73,6 +75,19 @@ function sessionFileFor(tracePath) {
 }
 
 function load(arg) {
+  const parts = arg.split(',').filter(Boolean).map(loadOne);
+  const unique = (values) => [...new Set(values)].join(', ');
+  return {
+    label: parts.map((p) => p.label).join(' + '),
+    commit: unique(parts.map((p) => p.commit)),
+    claude: unique(parts.map((p) => p.claude)),
+    plugins: unique(parts.map((p) => p.plugins)),
+    partial: parts.some((p) => p.partial),
+    runs: parts.flatMap((p, i) => p.runs.map((r) => ({ ...r, key: parts.length > 1 ? `${i + 1}:${r.key}` : r.key }))),
+  };
+}
+
+function loadOne(arg) {
   const dir = arg.endsWith('.json') ? dirname(arg) : arg;
   const resultFile = join(dir, 'aggregate-result.json');
   if (!existsSync(resultFile)) {
@@ -110,7 +125,8 @@ function load(arg) {
   const commitFile = join(dir, 'commit.txt');
   return {
     label: basename(dirname(dir)) === 'results' ? basename(dir) : `${basename(dirname(dir))}/${basename(dir)}`,
-    commit: existsSync(commitFile) ? readFileSync(commitFile, 'utf8').trim() : 'unknown',
+    // Older runs recorded `git describe` output (<tag>-<n>-g<sha>); keep only the commit.
+    commit: existsSync(commitFile) ? readFileSync(commitFile, 'utf8').trim().replace(/^.*-g([0-9a-f]{7,})(-dirty)?$/, '$1$2') : 'unknown',
     claude: result.claudeVersion,
     plugins: (result.suite?.plugins ?? []).map((p) => `${p.name}@${p.version}`).join(', '),
     partial: result.partial,

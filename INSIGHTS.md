@@ -82,3 +82,28 @@ Entry template:
 - **Context:** the first build of the catalog site against the SDD engineering plugins (#3).
 - **Insight:** skills use `metadata:` with `tags: a, b` under it, the Agent Skills convention, so a parser that rejects every nested mapping, as the spec first said, fails on real content. Agents also use `skills:` lists and `disallowedTools`.
 - **Action:** `site/lib/frontmatter.mjs` accepts one level of mapping and still fails with `file:line` on deeper nesting; `metadata.tags` become search keywords. Build the site against new plugins before relying on a parser rule.
+
+## 2026-10-14 — A stable channel pins the plugin, not its dependencies or its data
+- **Context:** setting up the `stable` branch as a second catalog, `gm-ai-marketplace-stable`, for rollback.
+- **Insight:** dependency ranges resolve against the `<plugin>--v<version>` tags of the whole repository, so a stable plugin picks up the newest dependency tag in its range even if that release was never promoted. `${CLAUDE_PLUGIN_DATA}` is `~/.claude/plugins/data/<plugin>-<marketplace>/`, so the two channels of one plugin have separate data directories. Installing from the stable branch resolved the same `*--v1.0.0` tags as latest (`1.0.0-6b7d849a6734`).
+- **Action:** `docs/releasing.md` (*Release channels*) says both; a dependency change stable users must not get yet needs a major version, and switching channels copies the data directory.
+
+## 2026-10-14 — Let the cost scenario's orchestrator pick defaults and the spec triples
+- **Context:** the first run of `evals/cost-workflow/spec-and-plan`.
+- **Insight:** told to "take the recommended default", the orchestrator accepted every UX and edge-case proposal: the spec grew to six `must` stories and ~30 ACs, spec-creator ran seven times through revise loops, and the run cost $5.52 in 22 minutes. Planner pass 2 also stopped once, because it got "accept REC1–REC5" without the pass-1 report it reads the REC text from. With "smallest scope, reject UX proposals, revise at most once" and the pass-1 report passed by path, the same flow cost $1.92 in 8 minutes and passed every grader.
+- **Action:** the scenario says so; the `sdd-engineering` README tells users to save the pass-1 report and pass its path.
+
+## 2026-10-14 — What `claude plugin eval` keeps of a run
+- **Context:** counting tokens and tool calls per run for `docs/COST-BASELINE.md`.
+- **Insight:** `aggregate-result.json` has per-run `costUsd`, `durationSeconds`, `turns` and `passed`, but no token counts, and the run's `trace.jsonl` is deleted afterwards. With `--keep-temp` the run's own config directory stays in `/tmp/e-*/config/projects/`, with the main transcript and `subagents/*.jsonl`; its `home/` and `tmp/` are sealed with mode 000. The kept `out/trace.jsonl` holds subagent messages too, marked with `parent_tool_use_id`, so `tool_used` graders can check what an agent did, not only the orchestrator.
+- **Action:** `scripts/run-evals.sh` keeps temp for `cost-workflow`; `scripts/compare-evals.mjs` reads the transcripts and saves `metrics.json` beside the result, so a comparison survives the temp cleanup.
+
+## 2026-10-14 — The plugin_loaded event is the version trace
+- **Context:** proving which plugin version a session runs.
+- **Insight:** with `CLAUDE_CODE_ENABLE_TELEMETRY=1`, `OTEL_LOGS_EXPORTER=console` and `OTEL_LOG_TOOL_DETAILS=1`, a `claude -p` session prints one `claude_code.plugin_loaded` record per plugin, dependencies included, with `plugin.name`, `plugin.version` (the manifest version, without the tag-commit suffix `claude plugin list` shows) and `marketplace.name`. The console exporter prints JavaScript object literals, not JSON, and every record carries the user's email and account ids. `plugin.scope` is a category (`user-local`, `official`), not the install scope.
+- **Action:** `scripts/trace-plugin-version.mjs` parses the records and prints only plugin fields.
+
+## 2026-10-14 — Don't edit a shell script while it runs
+- **Context:** changing `scripts/run-evals.sh` during a 20-minute eval run.
+- **Insight:** bash reads a script as it executes it. Rewriting the file in place made the running copy read the new file from its old byte offset after the eval returned: a syntax error and a skipped `commit.txt`. Writing a new file and `mv`-ing it over the old one leaves the running process on the old inode.
+- **Action:** replace scripts with `mv` while they may be running.
