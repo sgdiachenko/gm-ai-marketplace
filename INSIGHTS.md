@@ -107,3 +107,8 @@ Entry template:
 - **Context:** changing `scripts/run-evals.sh` during a 20-minute eval run.
 - **Insight:** bash reads a script as it executes it. Rewriting the file in place made the running copy read the new file from its old byte offset after the eval returned: a syntax error and a skipped `commit.txt`. Writing a new file and `mv`-ing it over the old one leaves the running process on the old inode.
 - **Action:** replace scripts with `mv` while they may be running.
+
+## 2026-10-14 — Rolling a project back to stable is disable, install, copy data
+- **Context:** rehearsing the return from latest to the stable channel in `vocabulary-nextjs`, at project scope.
+- **Insight:** `claude plugin disable` refuses a plugin that another enabled plugin requires, so dependents go first and dependencies last, and enabling goes the other way. Both channels' copies can stay installed; with one set disabled, the session loads only the other (the `plugin_loaded` events show `marketplace.name`). Uninstalling instead of disabling would delete `~/.claude/plugins/data/<plugin>-<marketplace>/`. `claude plugin prune --scope project` after uninstalling the stable copy removed only the stable dependencies; the latest ones stayed because an enabled plugin still needed them.
+- **Action:** `docs/releasing.md` (*Move a project to stable, and back*) lists the commands in that order.
