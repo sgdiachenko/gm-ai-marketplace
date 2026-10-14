@@ -8,10 +8,14 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('..', import.meta.url));
 const SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 // Everything under plugins/<name>/ is copied to users, so maintainer files stay at the repo root.
-const MAINTAINER_ONLY = ['AGENTS.md', 'CLAUDE.md', 'INSIGHTS.md', 'docs', 'specs', 'tests', 'node_modules'];
+const MAINTAINER_ONLY = ['AGENTS.md', 'CLAUDE.md', 'INSIGHTS.md', 'docs', 'specs', 'tests', 'evals', 'node_modules'];
 const TEXT_EXTENSIONS = new Set(['.md', '.json', '.sh', '.js', '.mjs', '.cjs', '.ts', '.py', '.yml', '.yaml', '.toml', '.txt']);
 // Matches ${CLAUDE_PLUGIN_ROOT}/x, "${CLAUDE_PLUGIN_ROOT}"/x and the JSON-escaped \"${CLAUDE_PLUGIN_ROOT}\"/x.
 const PLUGIN_ROOT_REF = /\$\{CLAUDE_PLUGIN_ROOT\}(?:\\?")?\/([\w./-]+)/g;
+// The same forms of ${CLAUDE_SKILL_DIR}/x, which resolves to the folder holding the skill's SKILL.md.
+const SKILL_DIR_REF = /\$\{CLAUDE_SKILL_DIR\}(?:\\?")?\/([\w./-]+)/g;
+// Plugins are shared across projects: no plugin may point at one project's files or at its own source layout.
+const FORBIDDEN_REF = /dev-?digest|\.claude\/(?:skills|agents)\//i;
 // Catalog metadata and docs are in English. Skill bodies, plugin code and quoted examples in `code` may use any language.
 const CYRILLIC = /[\u0400-\u04FF]/;
 const CODE = /```[\s\S]*?```|`[^`\n]*`/g;
@@ -20,6 +24,7 @@ const COMPONENT_DOC = /^(skills\/[^/]+\/SKILL|agents\/[^/]+|commands\/[^/]+)\.md
 const ROOT_DOCS = ['.claude-plugin/marketplace.json', 'README.md', 'AGENTS.md', 'INSIGHTS.md', 'docs', 'specs'];
 
 const errors = [];
+const plugins = new Map(); // name -> { dir, manifest, components }
 const fail = (message) => errors.push(message);
 const rel = (path) => relative(root, path) || '.';
 
@@ -51,6 +56,106 @@ function checkEnglish(path, text = readFileSync(path, 'utf8')) {
   if (line !== -1) fail(`${rel(path)}:${line + 1}: Cyrillic text; catalog metadata and docs are in English`);
 }
 
+function frontmatter(text) {
+  return FRONTMATTER.exec(text)?.[0] ?? '';
+}
+
+function frontmatterName(text) {
+  return /^name:\s*["']?([^"'\n]+?)["']?\s*$/m.exec(frontmatter(text))?.[1];
+}
+
+// The `skills:` list of an agent: a block list (`- name`) or a flow list (`[a, b]`).
+function frontmatterSkills(text) {
+  const lines = frontmatter(text).split('\n');
+  const start = lines.findIndex((line) => /^skills:/.test(line));
+  if (start === -1) return [];
+  const inline = /^skills:\s*\[(.*)\]\s*$/.exec(lines[start]);
+  if (inline) return inline[1].split(',').map((s) => s.trim().replace(/^["']|["']$/g, '')).filter(Boolean);
+  const skills = [];
+  for (const line of lines.slice(start + 1)) {
+    const item = /^\s+-\s*["']?([^"'\n]+?)["']?\s*$/.exec(line);
+    if (!item) break;
+    skills.push(item[1]);
+  }
+  return skills;
+}
+
+// Component names as Claude Code namespaces them: skills by frontmatter name or folder,
+// agents by frontmatter name or file name with subfolders joined by ":", commands by file name.
+function listComponents(dir) {
+  const components = new Set();
+  const skillsDir = join(dir, 'skills');
+  if (existsSync(skillsDir)) {
+    for (const entry of readdirSync(skillsDir, { withFileTypes: true })) {
+      const skillFile = join(skillsDir, entry.name, 'SKILL.md');
+      if (entry.isDirectory() && existsSync(skillFile)) components.add(frontmatterName(readFileSync(skillFile, 'utf8')) ?? entry.name);
+    }
+  }
+  for (const kind of ['agents', 'commands']) {
+    const kindDir = join(dir, kind);
+    if (!existsSync(kindDir)) continue;
+    for (const file of walk(kindDir).filter((f) => extname(f) === '.md')) {
+      const parts = relative(kindDir, file).split(sep);
+      const base = parts.pop().replace(/\.md$/, '');
+      const name = kind === 'agents' ? frontmatterName(readFileSync(file, 'utf8')) ?? base : base;
+      components.add([...parts, name].join(':'));
+    }
+  }
+  return components;
+}
+
+// Minimal semver range matching for `dependencies`: ^, ~, comparison operators, x-ranges, spaces (AND) and ||.
+function parseVersion(version) {
+  const match = /^v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?$/.exec(version ?? '');
+  return match && { parts: [Number(match[1]), Number(match[2]), Number(match[3])], pre: match[4] };
+}
+
+function compareParts(a, b) {
+  for (let i = 0; i < 3; i++) if (a[i] !== b[i]) return a[i] - b[i];
+  return 0;
+}
+
+function comparatorBounds(comparator) {
+  const match = /^(\^|~|>=|<=|>|<|=)?v?(\d+|[xX*])(?:\.(\d+|[xX*]))?(?:\.(\d+|[xX*]))?$/.exec(comparator);
+  if (!match) throw new Error(`unsupported range syntax "${comparator}"`);
+  const [, op = '', ...raw] = match;
+  const given = raw.map((part) => (part === undefined || /[xX*]/.test(part) ? undefined : Number(part)));
+  const known = given.findIndex((part) => part === undefined);
+  const depth = known === -1 ? 3 : known; // how many leading parts are fixed
+  const low = given.map((part) => part ?? 0);
+  const bump = (index) => low.map((part, i) => (i < index ? part : i === index ? part + 1 : 0));
+  if (op === '>=') return { low };
+  if (op === '>') return depth === 3 ? { low, lowExclusive: true } : { low: bump(depth - 1) };
+  if (op === '<') return { high: low };
+  if (op === '<=') return depth === 3 ? { high: low, highInclusive: true } : { high: bump(depth - 1) };
+  if (op === '^') {
+    const first = low.findIndex((part, i) => part !== 0 || i >= depth - 1);
+    return { low, high: bump(Math.min(first, depth - 1)) };
+  }
+  if (op === '~') return { low, high: bump(depth >= 2 ? 1 : 0) };
+  if (depth === 0) return { low };
+  return depth === 3 ? { low, high: low, highInclusive: true } : { low, high: bump(depth - 1) };
+}
+
+function satisfies(version, range) {
+  const parsed = parseVersion(version);
+  if (!parsed || parsed.pre) return false; // ranges in this repo don't opt into pre-releases
+  return range.split('||').some((set) =>
+    set.trim().split(/\s+/).every((comparator) => {
+      const { low, high, lowExclusive, highInclusive } = comparatorBounds(comparator);
+      if (low) {
+        const c = compareParts(parsed.parts, low);
+        if (c < 0 || (c === 0 && lowExclusive)) return false;
+      }
+      if (high) {
+        const c = compareParts(parsed.parts, high);
+        if (c > 0 || (c === 0 && !highInclusive)) return false;
+      }
+      return true;
+    }),
+  );
+}
+
 function hasShebang(path) {
   const fd = openSync(path, 'r');
   const head = Buffer.alloc(2);
@@ -74,16 +179,35 @@ function checkFile(file, pluginDir) {
   if (hasShebang(file) && (stat.mode & 0o111) === 0) fail(`${rel(file)}: has a shebang but is not executable (chmod +x)`);
 
   const path = relative(pluginDir, file).split(sep).join('/');
-  if (path === '.claude-plugin/plugin.json' || path === 'README.md') checkEnglish(file);
+  if (path === '.claude-plugin/plugin.json' || path === 'README.md' || path === 'CHANGELOG.md') checkEnglish(file);
   else if (COMPONENT_DOC.test(path)) checkEnglish(file, FRONTMATTER.exec(readFileSync(file, 'utf8'))?.[0] ?? '');
 
   if (!TEXT_EXTENSIONS.has(extname(file))) return;
 
-  for (const match of readFileSync(file, 'utf8').matchAll(PLUGIN_ROOT_REF)) {
+  const text = readFileSync(file, 'utf8');
+  for (const match of text.matchAll(PLUGIN_ROOT_REF)) {
     const target = match[1].replace(/\.+$/, '');
     const path = resolve(pluginDir, target);
     if (!isInside(path, pluginDir)) fail(`${rel(file)}: \${CLAUDE_PLUGIN_ROOT}/${target} escapes the plugin directory`);
     else if (!existsSync(path)) fail(`${rel(file)}: \${CLAUDE_PLUGIN_ROOT}/${target} does not exist in the plugin`);
+  }
+
+  const skillDir = /^skills\/[^/]+\//.exec(path)?.[0];
+  for (const match of text.matchAll(SKILL_DIR_REF)) {
+    const target = match[1].replace(/\.+$/, '');
+    if (!skillDir) {
+      fail(`${rel(file)}: \${CLAUDE_SKILL_DIR} only resolves in a skill's own files; use \${CLAUDE_PLUGIN_ROOT} here`);
+      continue;
+    }
+    const base = join(pluginDir, skillDir);
+    const resolved = resolve(base, target);
+    if (!isInside(resolved, base)) fail(`${rel(file)}: \${CLAUDE_SKILL_DIR}/${target} escapes the skill directory`);
+    else if (!existsSync(resolved)) fail(`${rel(file)}: \${CLAUDE_SKILL_DIR}/${target} does not exist in ${skillDir}`);
+  }
+
+  const line = text.split('\n').findIndex((l) => FORBIDDEN_REF.test(l));
+  if (line !== -1) {
+    fail(`${rel(file)}:${line + 1}: names "${FORBIDDEN_REF.exec(text)[0]}"; plugins are shared, so take project paths from inputs and call skills and agents by <plugin>:<name>`);
   }
 }
 
@@ -109,7 +233,68 @@ function checkPlugin(entry, where) {
   if (existsSync(join(dir, 'bin'))) {
     fail(`${rel(join(dir, 'bin'))}: claude.ai organization sync rejects a top-level bin/; use scripts/ and "\${CLAUDE_PLUGIN_ROOT}"/scripts/<name>`);
   }
+  const changelog = join(dir, 'CHANGELOG.md');
+  if (!existsSync(changelog)) fail(`${rel(dir)}: missing CHANGELOG.md; add a "## <version> — <date>" entry per release`);
+  else if (manifest?.version) {
+    const heading = new RegExp(`^##\\s+\\[?v?${manifest.version.replace(/[.+]/g, '\\$&')}\\]?(\\s|$)`, 'm');
+    if (!heading.test(readFileSync(changelog, 'utf8'))) fail(`${rel(changelog)}: no "## ${manifest.version}" entry for the version in plugin.json`);
+  }
+
   for (const file of walk(dir)) checkFile(file, dir);
+  plugins.set(entry.name, { dir, manifest, components: listComponents(dir) });
+}
+
+function dependencyEntries(manifest) {
+  return (manifest?.dependencies ?? []).map((dep) => {
+    if (typeof dep !== 'string') return dep;
+    const [name, marketplaceName] = dep.split('@');
+    return { name, marketplace: marketplaceName };
+  });
+}
+
+// Every dependency is in this catalog and its current version satisfies the declared range.
+function checkDependencies(name, { dir, manifest }) {
+  const where = rel(join(dir, '.claude-plugin', 'plugin.json'));
+  for (const dep of dependencyEntries(manifest)) {
+    if (dep.marketplace && dep.marketplace !== marketplace.name) {
+      fail(`${where}: dependency "${dep.name}@${dep.marketplace}" is in another marketplace; this repo has no cross-marketplace allowlist`);
+      continue;
+    }
+    const target = plugins.get(dep.name);
+    if (dep.name === name) fail(`${where}: depends on itself`);
+    else if (!target) fail(`${where}: dependency "${dep.name}" is not in the catalog`);
+    else if (dep.version) {
+      try {
+        if (!satisfies(target.manifest?.version, dep.version)) {
+          fail(`${where}: dependency "${dep.name}" requires "${dep.version}", but the catalog has ${target.manifest?.version}`);
+        }
+      } catch (error) {
+        fail(`${where}: dependency "${dep.name}": ${error.message}`);
+      }
+    }
+  }
+}
+
+// A <plugin>:<component> reference names this plugin or a direct dependency, and the component exists.
+function checkReferences(name, { dir, manifest }) {
+  const allowed = new Set([name, ...dependencyEntries(manifest).map((dep) => dep.name)]);
+  const names = [...plugins.keys()].map((n) => n.replace(/[-]/g, '\\-'));
+  const reference = new RegExp(`(?<![\\w./@-])(${names.join('|')}):([a-z0-9][a-z0-9-]*(?::[a-z0-9][a-z0-9-]*)*)`, 'g');
+  for (const file of walk(dir).filter((f) => TEXT_EXTENSIONS.has(extname(f)) && !lstatSync(f).isSymbolicLink())) {
+    const text = readFileSync(file, 'utf8');
+    if (/^agents\//.test(relative(dir, file).split(sep).join('/'))) {
+      for (const skill of frontmatterSkills(text)) {
+        if (!skill.includes(':')) fail(`${rel(file)}: skills entry "${skill}" needs its plugin namespace, as <plugin>:${skill}`);
+      }
+    }
+    for (const [i, line] of text.split('\n').entries()) {
+      for (const [, plugin, component] of line.matchAll(reference)) {
+        const at = `${rel(file)}:${i + 1}`;
+        if (!allowed.has(plugin)) fail(`${at}: uses ${plugin}:${component}; add "${plugin}" to dependencies in plugin.json`);
+        else if (!plugins.get(plugin).components.has(component)) fail(`${at}: ${plugin}:${component} does not exist in plugins/${plugin}`);
+      }
+    }
+  }
 }
 
 const marketplacePath = join(root, '.claude-plugin', 'marketplace.json');
@@ -121,6 +306,11 @@ if (marketplace) {
     listed.add(entry.name);
     if ('version' in entry) fail(`${where}: remove "version"; it lives only in the plugin's plugin.json`);
     if (typeof entry.source === 'string') checkPlugin(entry, where);
+  }
+
+  for (const [name, info] of plugins) {
+    checkDependencies(name, info);
+    checkReferences(name, info);
   }
 
   const pluginsDir = join(root, 'plugins');

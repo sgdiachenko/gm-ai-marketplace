@@ -38,13 +38,14 @@ function compareSemver(a, b) {
   return x[3].localeCompare(y[3], 'en', { numeric: true });
 }
 
-// Plugins with changes since the merge base. README-only changes don't need a release.
+// Plugins with changes since the merge base. README-only and CHANGELOG-only changes don't need a release.
+const NO_RELEASE = new Set(['README.md', 'CHANGELOG.md']);
 const changedPlugins = new Set(
   git('diff', '--name-only', `${base}...HEAD`, '--', 'plugins/')
     .split('\n')
     .filter(Boolean)
     .map((file) => file.split('/'))
-    .filter(([, , ...rest]) => rest.join('/') !== 'README.md')
+    .filter(([, , ...rest]) => !NO_RELEASE.has(rest.join('/')))
     .map(([, name]) => name),
 );
 

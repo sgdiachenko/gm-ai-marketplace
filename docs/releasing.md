@@ -4,7 +4,9 @@
 
 Each plugin has its own semver `version` in `plugins/<name>/.claude-plugin/plugin.json`. There is no repo-wide version, and catalog entries carry none.
 
-Claude Code caches a plugin by its version. Push new commits under the same version and users keep the old copy. So every PR that changes files under `plugins/<name>/` bumps that plugin's version. Changes to the plugin's `README.md` alone are exempt. `scripts/check-pr.mjs` enforces this in CI.
+Claude Code caches a plugin by its version. Push new commits under the same version and users keep the old copy. So every PR that changes files under `plugins/<name>/` bumps that plugin's version. Changes to the plugin's `README.md` or `CHANGELOG.md` alone are exempt. `scripts/check-pr.mjs` enforces this in CI.
+
+Every release adds a `## <version> — <YYYY-MM-DD>` entry to the plugin's `CHANGELOG.md`, with `Added`, `Changed`, `Removed` or `Fixed` lists. `scripts/check-marketplace.mjs` fails when the entry for the version in `plugin.json` is missing.
 
 | Bump | When |
 |---|---|
@@ -13,6 +15,20 @@ Claude Code caches a plugin by its version. Push new commits under the same vers
 | major `0.2.0 → 1.0.0` | removed or renamed components or `userConfig` keys, behaviour users must adapt to |
 
 Keep each PR to one plugin where you can, so a release is easy to review and roll back.
+
+## Dependencies between plugins
+
+A plugin that uses another plugin's skill or agent declares it in `plugin.json`:
+
+```json
+"dependencies": [{ "name": "engineering-paved-path", "version": "^1.0.0" }]
+```
+
+- **Declare every plugin you name.** A `<plugin>:<component>` reference anywhere in a plugin must name the plugin itself or a direct dependency; reaching it through another dependency doesn't count. `scripts/check-marketplace.mjs` checks this, that the component exists, and that the dependency's current version satisfies the range.
+- **Ranges resolve against git tags** named `<plugin>--v<version>` in this repository. After each merge to `main`, `.github/workflows/tag-releases.yml` runs `scripts/tag-releases.mjs --push`, which tags every plugin version that has no tag yet. Without a matching tag, Claude Code installs the catalog's current copy and disables the dependent plugin if that copy is outside the range.
+- **Release dependencies first.** A dependent's new range must be satisfied by a version already on `main`. With one PR per plugin, merge the dependency's release, then the dependent's.
+- **A major release of a dependency** breaks every dependent pinned to the old major. Release the dependency, then bump each dependent's range in its own release after testing it.
+- **Testing locally**, load the dependent and its dependencies together: `claude --plugin-dir plugins/<dependency> --plugin-dir plugins/<name>`. A local copy satisfies any range.
 
 ## Check a release before merging
 

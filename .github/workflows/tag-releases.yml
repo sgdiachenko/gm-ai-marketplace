@@ -1,0 +1,35 @@
+name: Tag releases
+
+# Dependency ranges such as "^1.0.0" resolve against git tags named <plugin>--v<version>.
+# After each merge to main, tag every plugin version that has no tag yet.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tag-releases
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Set the tagger identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Tag untagged plugin versions
+        run: node scripts/tag-releases.mjs --push
